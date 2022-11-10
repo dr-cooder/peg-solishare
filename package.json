@@ -1,0 +1,54 @@
+{
+  "name": "peg-solishare",
+  "version": "1.0.0",
+  "description": "In Peg SoliShare, players can play Peg Solitaire puzzles created by other players around the world, or create and share their own puzzles with the world.",
+  "main": "./server/app.js",
+  "scripts": {
+    "webpack": "webpack",
+    "nodemon": "nodemon -e js,html,css --watch ./hosted --watch ./server --watch ./hosted ./server/app.js ",
+    "start": "node ./server/app.js",
+    "pretest": "eslint ./server --fix",
+    "test": "echo \"Tests complete\"",
+    "build": "gulp build",
+    "watch": "gulp watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dr-cooder/peg-solishare.git"
+  },
+  "author": "Felix Warner",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dr-cooder/peg-solishare/issues"
+  },
+  "homepage": "https://github.com/dr-cooder/peg-solishare#readme",
+  "dependencies": {
+    "body-parser": "^1.20.1",
+    "bootstrap": "^5.2.2",
+    "compression": "^1.7.4",
+    "express": "^4.18.2",
+    "express-handlebars": "^6.0.6",
+    "gulp": "github:gulpjs/gulp",
+    "gulp-eslint-new": "^1.1.2",
+    "gulp-nodemon": "^2.2.1",
+    "gulp-sass": "^5.1.0",
+    "sass": "^1.56.1",
+    "serve-favicon": "^2.5.0",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^4.10.0",
+    "webpack-stream": "^7.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.2",
+    "@babel/preset-react": "^7.18.6",
+    "babel-loader": "^9.1.0",
+    "dart-sass": "^1.25.0",
+    "eslint": "^8.27.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-plugin-import": "^2.26.0",
+    "nodemon": "^2.0.20"
+  },
+  "overrides": {
+    "graceful-fs": "^4.2.10"
+  }
+}
