@@ -1,6 +1,7 @@
 const gulp = require('gulp');
 const sass = require('gulp-sass')(require('sass'));
 const eslint = require('gulp-eslint-new');
+const minify = require('gulp-clean-css');
 const webpack = require('webpack-stream');
 const nodemon = require('gulp-nodemon');
 const webpackConfig = require('./webpack.config.js');
@@ -8,6 +9,8 @@ const webpackConfig = require('./webpack.config.js');
 const sassTask = (done) => {
   gulp.src('./scss/main.scss')
     .pipe(sass().on('error', sass.logError))
+    // https://chrispennington.blog/blog/20201219-compile-and-minify-scss-with-gulpjs-in-hugo/
+    .pipe(minify())
     .pipe(gulp.dest('./hosted'));
 
   done();

@@ -29,6 +29,7 @@
     "express": "^4.18.2",
     "express-handlebars": "^6.0.6",
     "gulp": "github:gulpjs/gulp",
+    "gulp-clean-css": "^4.3.0",
     "gulp-eslint-new": "^1.1.2",
     "gulp-nodemon": "^2.2.1",
     "gulp-sass": "^5.1.0",
