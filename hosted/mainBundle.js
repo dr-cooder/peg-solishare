@@ -1,1 +1,1 @@
-console.log("Hello world!");
+(()=>{var r={727:r=>{new Uint8Array([2,2,0,0,0,2,2]),new Uint8Array([2,2,0,0,0,2,2]),new Uint8Array([0,0,0,0,0,0,0]),new Uint8Array([0,0,0,0,0,0,0]),new Uint8Array([0,0,0,0,0,0,0]),new Uint8Array([2,2,0,0,0,2,2]),new Uint8Array([2,2,0,0,0,2,2]),r.exports=class{constructor(){}codeToSpaces(r){const n=[];for(let r=0;r<7;r++)n[r]=new Uint8Array(7)}}}},n={};function e(t){var o=n[t];if(void 0!==o)return o.exports;var a=n[t]={exports:{}};return r[t](a,a.exports,e),a.exports}e(727),console.log("Hello world!")})();
