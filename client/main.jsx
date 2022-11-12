@@ -1,3 +1,4 @@
 const Configuration = require('./Configuration.jsx');
 
-console.log('Hello world!');
+const sample = new Configuration();
+console.log(sample.grid);
