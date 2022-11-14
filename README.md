@@ -12,6 +12,9 @@ In Peg SoliShare, players can play Peg Solitaire puzzles created by other player
 - https://chrispennington.blog/blog/20201219-compile-and-minify-scss-with-gulpjs-in-hugo/
 - https://stackoverflow.com/questions/21988909/is-it-possible-to-create-a-fixed-length-array-in-javascript
 - https://stackoverflow.com/questions/1779013/check-if-string-contains-only-digits
+- https://www.sitepoint.com/using-regular-expressions-to-check-string-length/
+- https://www.webtips.dev/webtips/javascript/javascript-create-regex-from-string-variable
+- https://stackoverflow.com/questions/37199019/method-set-prototype-add-called-on-incompatible-receiver-undefined
 - Bootstrap documentation
 ### External Components
 - Bootstrap

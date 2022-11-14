@@ -21,9 +21,13 @@ const emptyBoard = () => {
 };
 const spaces = 33;
 const codeLength = 9;
-
 // https://stackoverflow.com/questions/1779013/check-if-string-contains-only-digits
-const isCode = (str) => str.length === codeLength && /^[0-9a-f]+$/.test(str);
+// https://www.sitepoint.com/using-regular-expressions-to-check-string-length/
+// https://www.webtips.dev/webtips/javascript/javascript-create-regex-from-string-variable
+const codePattern = new RegExp(`^[0-9a-f]{${codeLength}}$`);
+
+// https://stackoverflow.com/questions/37199019/method-set-prototype-add-called-on-incompatible-receiver-undefined
+const isCode = codePattern.test.bind(codePattern);
 
 const isGrid = (obj) => {
   if (!obj) return false;
@@ -93,9 +97,13 @@ class Configuration {
     }
 
     // TO-DO: next possible moves
-    // - calculate upon creation
+    // - don't calculate upon creation; resource-intensive
     // - only give a list of grids, not entire Config instances
     //   - that would cause recursion and too much of it at that
+  }
+
+  gridString() {
+    return this.grid.map((r) => Array.from(r).map((c) => ['.', 'O', ' '][c]).join(' ')).join('\n');
   }
 }
 
