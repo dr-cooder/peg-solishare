@@ -96,10 +96,9 @@ class Configuration {
       this.board = emptyBoard();
     }
 
-    // TO-DO: next possible moves
-    // - don't calculate upon creation; resource-intensive
-    // - only give a list of grids, not entire Config instances
-    //   - that would cause recursion and too much of it at that
+    // TO-DO:
+    // isValidMove({from:{x,y},to:{x,y}})=>bool
+    // validMoves()=>[{grid:Uint8Array[],from:{x,y},to:{x,y}}]
   }
 
   gridString() {
