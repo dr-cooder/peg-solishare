@@ -1,4 +1,4 @@
-const Configuration = require('./Configuration.jsx');
+const Configuration = require('./Configuration.js');
 
 const samples = {
   disappearingAct1: [
