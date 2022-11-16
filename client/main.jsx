@@ -66,11 +66,15 @@ const samples = {
   ],
 };
 
-const sample = new Configuration(samples.baseGame);
-console.log(sample.gridToString());
-const solution = sample.solveOne();
-for (let i = 0; i < solution.length; i++) {
-  const move = solution[i];
-  sample.makeMove(move);
+const showSolution = async (sample) => {
   console.log(sample.gridToString());
-}
+  const code = sample.code()
+  const { solution } = await (await fetch(`/solve?code=${code}`)).json();
+  for (let i = 0; i < solution.length; i++) {
+    const move = solution[i];
+    sample.makeMove(move);
+    console.log(sample.gridToString());
+  }
+};
+
+showSolution(new Configuration(samples.puroMask));
