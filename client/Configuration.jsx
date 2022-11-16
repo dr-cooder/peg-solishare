@@ -63,6 +63,40 @@ const validMoveDeltas = [
 ];
 const validMoveDeltaCount = 4;
 
+const maxX = gridWidth - 1;
+const maxY = gridWidth - 1;
+const symmetries = {
+  flipHoriz: (coords) => ({
+    x: maxX - coords.x,
+    y: coords.y,
+  }),
+  flipVert: (coords) => ({
+    x: coords.x,
+    y: maxY - coords.y,
+  }),
+  flipDiagPos: (coords) => ({
+    x: coords.y,
+    y: coords.x,
+  }),
+  flipDiagNeg: (coords) => ({
+    x: maxY - coords.y,
+    y: maxX - coords.x,
+  }),
+  rotate180: (coords) => ({
+    x: maxX - coords.x,
+    y: maxY - coords.y,
+  }),
+  rotate90counterClock: (coords) => ({
+    x: coords.y,
+    y: maxX - coords.x,
+  }),
+  rotate90clock: (coords) => ({
+    x: maxY - coords.y,
+    y: coords.x,
+  }),
+};
+const symmetryKVPs = Object.entries(symmetries);
+
 const codeLength = 9;
 // https://stackoverflow.com/questions/1779013/check-if-string-contains-only-digits
 // https://www.sitepoint.com/using-regular-expressions-to-check-string-length/
@@ -221,7 +255,7 @@ class Configuration {
 
   allValidMoves() {
     // Check for symmetries here - every move has a corresponding one with flipped dir+mag
-    // Possible moves are symmetrical <=> Board is symmetrical
+    // Possible moves are symmetrical <=> Board is symmetrical (THAT'S NOT TRUE UGH I'M AN IDIOT)
     const validMoves = [];
     // Iterate through every grid space
     for (let v = 0; v < gridHeight; v++) {
@@ -247,7 +281,6 @@ class Configuration {
         }
       }
     }
-    // Check symmetry of move set, cull redundant moves
     return validMoves;
   }
 
@@ -279,6 +312,31 @@ class Configuration {
     return ballCount;
   }
 
+  getSymmetries() {
+    const applicableSymmetries = [];
+
+    for (let i = 0; i < symmetryKVPs.length; i++) {
+      const [symmetryName, symmentryTransform] = symmetryKVPs[i];
+      let symmetryApplicable = true;
+
+      for (let v = 0; v < gridHeight; v++) {
+        for (let u = 0; u < gridWidth; u++) {
+          // SKIP IF NO SLOT
+          const { x: uPrime, y: vPrime } = symmentryTransform({ x: u, y: v });
+          if (this.grid[v][u] !== this.grid[vPrime][uPrime]) {
+            symmetryApplicable = false;
+            break;
+          }
+        }
+        if (!symmetryApplicable) break;
+      }
+
+      if (symmetryApplicable) applicableSymmetries.push(symmetryName);
+    }
+
+    return applicableSymmetries;
+  }
+
   // VERY RESOURCE-INTENSIVE; only viable in the case of puzzles with ~10 balls or less
   // Workaround ideas: cut down by symmetry (theoretically divides base game by  at least 8)
   // Cache configs of certain ball counts known to be solvable
@@ -289,7 +347,7 @@ class Configuration {
     const solutions = [];
 
     const solveRecursive = () => {
-      if (ballCount === 1) {
+      if (ballCount === 4) {
         // If a win state has been reached, register the move history as a solution
         const foundSolution = Array.from(moveHistory);
         solutions.push(foundSolution);
@@ -318,6 +376,117 @@ class Configuration {
     solveRecursive();
 
     return solutions;
+  }
+
+  solveOne() {
+    const testConfig = new Configuration(this.copyGrid());
+    let ballCount = testConfig.countBalls();
+    const moveHistory = [];
+
+    const solveRecursive = () => {
+      if (ballCount === 1) {
+        // If a win state has been reached, register the move history as a solution
+        return moveHistory;
+      }
+      // check for symmetries
+      // For every possible move
+      const moves = testConfig.allValidMoves();
+      for (let i = 0; i < moves.length; i++) {
+        const move = moves[i];
+
+        // Make the move and add it to the record
+        testConfig.makeMove(move);
+        ballCount--;
+        moveHistory.push(move);
+
+        // Keep branching, wait until all sub-branches are done
+        const solution = solveRecursive();
+        if (solution) return solution;
+
+        // Undo the move and remove it from the record
+        testConfig.makeMove(move, true);
+        ballCount++;
+        moveHistory.pop();
+      }
+      return null;
+    };
+
+    return solveRecursive();
+  }
+
+  solveBetter() {
+    // Make a copy of this instance for safety
+    const testConfig = new Configuration(this.copyGrid());
+    let ballCount = testConfig.countBalls();
+    const makeNode = (move) => {
+      const newNode = {
+        moveFromParent: move,
+        children: [],
+      };
+
+      if (move) {
+        testConfig.makeMove(move);
+        ballCount--;
+      }
+
+      const symmetryNames = testConfig.getSymmetries();
+      newNode.symmetries = symmetryNames;
+      const nextMoves = testConfig.allValidMoves();
+      const nextMovesLength = nextMoves.length;
+
+      // Cull next moves according to each observed symmetry
+      for (let i = 0; i < symmetryNames.length; i++) {
+        const currentSymmetryFunc = symmetries[symmetryNames[i]];
+        for (let j = 0; j < nextMovesLength; j++) {
+          // Pick a move, and determine its symmetry-transformed counterpart
+          const baseMove = nextMoves[j];
+          if (baseMove) {
+            const movePrimeActualFrom = currentSymmetryFunc(baseMove.from);
+            const movePrimeActualTo = currentSymmetryFunc(baseMove.to);
+            for (let k = 0; k < nextMovesLength; k++) {
+              // Avoid possibility of move getting culled by itself;
+              // certain transforms on certain points can be identity
+              if (j !== k) {
+                // If another move on the list matches the image, cull it;
+                // it is redundant because it and its branches can simply be replicated
+                // by applying the transform to the pre-image and all of its branches.
+                const movePrimeExpected = nextMoves[k];
+                if (movePrimeExpected) {
+                  const {
+                    from: movePrimeExpectedFrom,
+                    to: movePrimeExpectedTo,
+                  } = movePrimeExpected;
+                  if (movePrimeExpectedFrom.x === movePrimeActualFrom.x
+                    && movePrimeExpectedFrom.y === movePrimeActualFrom.y
+                    && movePrimeExpectedTo.x === movePrimeActualTo.x
+                    && movePrimeExpectedTo.y === movePrimeActualTo.y) {
+                    nextMoves[k] = null;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      for (let i = 0; i < nextMovesLength; i++) {
+        const nextMove = nextMoves[i];
+        if (nextMove) {
+          const child = makeNode(nextMove);
+          if (child.children.length !== 0 || ballCount === 1) {
+            newNode.children.push(child);
+          }
+        }
+      }
+
+      if (move) {
+        testConfig.makeMove(move, true);
+        ballCount++;
+      }
+
+      return newNode;
+    };
+    return makeNode();
   }
 
   gridToString() {
