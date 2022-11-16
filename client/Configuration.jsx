@@ -103,12 +103,11 @@ const isGrid = (obj) => {
   return true;
 };
 
+// DOES NOT VALIDATE CODE BY ITSELF FOR PERFORMANCE REASONS
 const codeToGrid = (code) => {
-  if (!isCode(code)) return null;
-
-  const grid = emptyBoard();
   // If there are no leading zeroes, the balls will be offset
   const codeBin = parseInt(code, 16).toString(2).padStart(spaces, '0');
+  const grid = emptyBoard();
 
   // "Print" balls left to right, top to bottom
   let i = 0;
@@ -126,19 +125,36 @@ const codeToGrid = (code) => {
   return grid;
 };
 
-// TO-DO: gridToCode(grid) and verify two-way-ness
+// DOES NOT VALIDATE GRID BY ITSELF FOR PERFORMANCE REASONS
+const gridToCode = (grid) => {
+  let codeBin = '';
+
+  // "Read" balls left to right, top to bottom
+  for (let v = 0; v < gridHeight; v++) {
+    const row = grid[v];
+    for (let u = 0; u < gridWidth; u++) {
+      // Skip over non-spaces
+      const space = row[u];
+      if (space !== 2) {
+        codeBin += space;
+      }
+    }
+  }
+
+  return parseInt(codeBin, 2).toString(16).padStart(codeLength, '0');
+};
+
+// ^ Consider importing everything above from another file
 
 class Configuration {
   constructor(basis) {
     if (!basis) {
       this.grid = emptyBoard();
     } else if (isGrid(basis)) {
-      // It is assumed that the passed-in grid is not an undesired shallow copy;
-      // That it has already been created through another Configuration's gridAfterMove
+      // It is assumed that the passed-in grid is not an undesired shallow copy
       this.grid = basis;
-    } else if (typeof basis === 'string') {
+    } else if (isCode(basis)) {
       this.grid = codeToGrid(basis);
-      if (!this.grid) this.grid = emptyBoard();
     } else {
       this.grid = emptyBoard();
     }
@@ -154,7 +170,7 @@ class Configuration {
   }
 
   // If move is valid, returns valid move delta type (right, up, left, down), otherwise returns null
-  isValidMove(move) {
+  isValidMove(move, reverse) {
     // Ensure passed-in move has the required properties
     if (!(move.from && typeof move.from.x === 'number' && typeof move.from.y === 'number'
       && move.to && typeof move.to.x === 'number' && typeof move.from.y === 'number')) return null;
@@ -182,16 +198,30 @@ class Configuration {
     if (toX < 0 || toX >= gridWidth) return null;
     if (toY < 0 || toY >= gridHeight) return null;
 
-    // Space at From must be 1, space at To must be 0, and space between must be 1
-    if (!(this.grid[fromY][fromX] === 1
-      && this.grid[midY][midX] === 1
-      && this.grid[toY][toX] === 0)) return null;
+    // If making the move normally, space at From must be 1,
+    // space at To must be 0, and space between must be 1.
+    // If making the move in reverse, space at From must be 0,
+    // space at To must be 1, and space between must be 0.
+    const spaceFromExpected = reverse ? 0 : 1;
+    const spaceMidExpected = reverse ? 0 : 1;
+    const spaceToExpected = reverse ? 1 : 0;
+    if (!(this.grid[fromY][fromX] === spaceFromExpected
+      && this.grid[midY][midX] === spaceMidExpected
+      && this.grid[toY][toX] === spaceToExpected)) return null;
 
     // Move is valid!
-    return matchingDelta;
+    return {
+      matchingDelta,
+      moveMid: {
+        x: midX,
+        y: midY,
+      },
+    };
   }
 
   allValidMoves() {
+    // Check for symmetries here - every move has a corresponding one with flipped dir+mag
+    // Possible moves are symmetrical <=> Board is symmetrical
     const validMoves = [];
     // Iterate through every grid space
     for (let v = 0; v < gridHeight; v++) {
@@ -217,53 +247,85 @@ class Configuration {
         }
       }
     }
+    // Check symmetry of move set, cull redundant moves
     return validMoves;
   }
 
-  // If move is valid, returns current grid after move is applied (as a deep copy),
-  // otherwise returns null
-  gridAfterMove(move) {
-    const delta = this.isValidMove(move);
-    if (!delta) return null;
+  // If move is valid, applies the move to the grid
+  makeMove(move, reverse) {
+    const moveIsValid = this.isValidMove(move, reverse);
+    if (!moveIsValid) return;
+    const { moveMid } = moveIsValid;
 
     const moveFrom = move.from;
-    const deltaMid = delta.middle;
-    const moveMid = {
-      x: moveFrom.x + deltaMid.x,
-      y: moveFrom.y + deltaMid.y,
-    };
     const moveTo = move.to;
 
-    const newGrid = this.copyGrid();
-    newGrid[moveFrom.y][moveFrom.x] = 0;
-    newGrid[moveMid.y][moveMid.x] = 0;
-    newGrid[moveTo.y][moveMid.x] = 1;
+    const fromAfter = reverse ? 1 : 0;
+    const midAfter = reverse ? 1 : 0;
+    const toAfter = reverse ? 0 : 1;
 
-    return newGrid;
+    this.grid[moveFrom.y][moveFrom.x] = fromAfter;
+    this.grid[moveMid.y][moveMid.x] = midAfter;
+    this.grid[moveTo.y][moveTo.x] = toAfter;
   }
 
-  isWon() {
+  countBalls() {
     let ballCount = 0;
     for (let v = 0; v < gridHeight; v++) {
       for (let u = 0; u < gridWidth; u++) {
         if (this.grid[v][u] === 1) ballCount++;
       }
     }
-    return ballCount === 1;
+    return ballCount;
   }
 
-  // TO-DO: recursive solve(moveHist): returns array of moves (moveHist)
-  // if !moveHist moveHist = []
-  // if this.isWon() return moveHist
-  // else
-  //  for each valid successorMove in allValidMoves()
-  //   successorConfig = new Config(this.gridAfterMove(successorMove))
-  //   solution = successorConfig.solve(moveHist+successorMove)
-  //   if (solution) return solution
-  //  return null
+  // VERY RESOURCE-INTENSIVE; only viable in the case of puzzles with ~10 balls or less
+  // Workaround ideas: cut down by symmetry (theoretically divides base game by  at least 8)
+  // Cache configs of certain ball counts known to be solvable
+  solve() {
+    const testConfig = new Configuration(this.copyGrid());
+    let ballCount = testConfig.countBalls();
+    const moveHistory = [];
+    const solutions = [];
+
+    const solveRecursive = () => {
+      if (ballCount === 1) {
+        // If a win state has been reached, register the move history as a solution
+        const foundSolution = Array.from(moveHistory);
+        solutions.push(foundSolution);
+      } else {
+        // check for symmetries
+        // For every possible move
+        const moves = testConfig.allValidMoves();
+        for (let i = 0; i < moves.length; i++) {
+          const move = moves[i];
+
+          // Make the move and add it to the record
+          testConfig.makeMove(move);
+          ballCount--;
+          moveHistory.push(move);
+
+          // Keep branching, wait until all sub-branches are done
+          solveRecursive();
+
+          // Undo the move and remove it from the record
+          testConfig.makeMove(move, true);
+          ballCount++;
+          moveHistory.pop();
+        }
+      }
+    };
+    solveRecursive();
+
+    return solutions;
+  }
 
   gridToString() {
     return this.grid.map((r) => Array.from(r).map((c) => ['.', 'O', ' '][c]).join(' ')).join('\n');
+  }
+
+  code() {
+    return gridToCode(this.grid);
   }
 }
 

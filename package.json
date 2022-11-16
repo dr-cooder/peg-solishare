@@ -10,7 +10,8 @@
     "pretest": "eslint ./server --fix",
     "test": "echo \"Tests complete\"",
     "build": "gulp build",
-    "watch": "gulp watch"
+    "watch": "gulp watch",
+    "buildWatch": "gulp build & gulp watch"
   },
   "repository": {
     "type": "git",
