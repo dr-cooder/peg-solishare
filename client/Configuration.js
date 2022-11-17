@@ -4,6 +4,7 @@ const {
   height,
   validMoveDeltas,
   validMoveDeltaCount,
+  symmetries,
   symmetryKVPs,
   isCode,
   isGrid,

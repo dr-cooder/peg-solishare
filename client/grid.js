@@ -29,8 +29,8 @@ const validMoveDeltas = [
     x: 2,
     y: 0,
     middle: {
-    x: 1,
-    y: 0,
+      x: 1,
+      y: 0,
     },
   },
   {
@@ -38,8 +38,8 @@ const validMoveDeltas = [
     x: 0,
     y: -2,
     middle: {
-    x: 0,
-    y: -1,
+      x: 0,
+      y: -1,
     },
   },
   {
@@ -47,8 +47,8 @@ const validMoveDeltas = [
     x: -2,
     y: 0,
     middle: {
-    x: -1,
-    y: 0,
+      x: -1,
+      y: 0,
     },
   },
   {
@@ -56,8 +56,8 @@ const validMoveDeltas = [
     x: 0,
     y: 2,
     middle: {
-    x: 0,
-    y: 1,
+      x: 0,
+      y: 1,
     },
   },
 ];
@@ -128,10 +128,10 @@ const isGrid = (obj) => {
 
     // Ensure the contents of the row are valid numbers
     for (let u = 0; u < rowLen; u++) {
-    const space = row[u];
-    if (space !== 0 && space !== 1 && space !== 2) return false;
-    // Also ensure that slot placement matches up
-    if ((emptyBoardInst[v][u] === 2) !== (space === 2)) return false;
+      const space = row[u];
+      if (space !== 0 && space !== 1 && space !== 2) return false;
+      // Also ensure that slot placement matches up
+      if ((emptyBoardInst[v][u] === 2) !== (space === 2)) return false;
     }
   }
 
@@ -149,11 +149,11 @@ const codeToGrid = (code) => {
   for (let v = 0; v < height; v++) {
     const row = grid[v];
     for (let u = 0; u < width; u++) {
-    // Skip over non-spaces
-    if (row[u] !== 2) {
-      row[u] = codeBin[i];
-      i++;
-    }
+      // Skip over non-spaces
+      if (row[u] !== 2) {
+        row[u] = codeBin[i];
+        i++;
+      }
     }
   }
 
@@ -192,4 +192,4 @@ module.exports = {
   isGrid,
   codeToGrid,
   gridToCode,
-}
+};

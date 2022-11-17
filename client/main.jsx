@@ -66,15 +66,49 @@ const samples = {
   ],
 };
 
-const showSolution = async (sample) => {
-  console.log(sample.gridToString());
-  const code = sample.code()
-  const { solution } = await (await fetch(`/solve?code=${code}`)).json();
-  for (let i = 0; i < solution.length; i++) {
-    const move = solution[i];
-    sample.makeMove(move);
-    console.log(sample.gridToString());
-  }
-};
+const SolveUI = (props) => {
+  const [status, setStatus] = React.useState();
+  const [stepNodes, setStepNodes] = React.useState();
+  const [solving, setSolving] = React.useState(false);
 
-showSolution(new Configuration(samples.puroMask));
+  const somethingWentWrong = () => {
+    setSolving(false);
+    setStatus('Something went wrong...');
+  }
+
+  const getSolution = async (code) => {
+    if (solving) return null;
+    setSolving(true);
+    setStatus('Calculating solution...');
+    const { solution } = await (
+      await fetch(`/solve?code=${code}`).catch(somethingWentWrong)
+      ).json().catch(somethingWentWrong);
+    setSolving(false);
+    setStatus('Solution found!');
+    setStepNodes(solution.map((step, index) => {
+      return (
+        <li key={index}>
+          {'('}{step.from.x}, {step.from.y}{')'} <i className="fa fa-solid fa-arrow-right"></i> {'('}{step.to.x}, {step.to.y}{')'}
+        </li>
+      );
+    }));
+  }
+
+  return (
+    <>
+      <button id="solveButton" type="button" className="btn btn-primary" disabled={solving}
+        onClick={() => {
+          const code = new Configuration(samples[props.puzzleName]).code();
+          getSolution(code);//.catch(somethingWentWrong);
+        }}>Solve!</button>
+      <h3>{status}</h3>
+      <ol id="steps">{stepNodes}</ol>
+    </>
+  );
+}
+
+const init = () => {
+  ReactDOM.createRoot(document.getElementById('solveUIContainer')).render(<SolveUI puzzleName="disappearingAct1"/>);
+}
+
+window.onload = init;
