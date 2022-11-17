@@ -15,8 +15,12 @@ In Peg SoliShare, players can play Peg Solitaire puzzles created by other player
 - https://www.sitepoint.com/using-regular-expressions-to-check-string-length/
 - https://www.webtips.dev/webtips/javascript/javascript-create-regex-from-string-variable
 - https://stackoverflow.com/questions/37199019/method-set-prototype-add-called-on-incompatible-receiver-undefined
+- https://youtu.be/R4vV4szAoDY
 - Bootstrap documentation
 ### External Components
 - Bootstrap
 ## To-Do
-- Everything
+- Server-side functionality of taking a grid code and list of all previous moves, determining if it is solvable (short-circuiting if the base puzzle is not), if so finding a solution and returning probably only the first move of it (in other words a hint); otherwise determining how many undos are required for a solvable grid.
+- Canvas-based game UI for gameplay; drag and drop balls, interface with Configuration class (don't have any solving behavior client-side though)
+- Puzzle-creation UI similar to above only balls are either placed manually or generated from reverse-moves; after which it can be uploaded (after being verified as solvable of course)
+- Leading to endgame: online functionality ("Course World"); create and upload, or browse and play (rating system? keep track of high scores?) 

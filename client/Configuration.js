@@ -4,10 +4,11 @@ const {
   height,
   validMoveDeltas,
   validMoveDeltaCount,
-  symmetries,
+  // symmetries,
   symmetryKVPs,
-  isCode,
+  isHexCode,
   isGrid,
+  copyGrid,
   codeToGrid,
   gridToCode,
 } = require('./grid.js');
@@ -19,20 +20,11 @@ class Configuration {
     } else if (isGrid(basis)) {
       // It is assumed that the passed-in grid is not an undesired shallow copy
       this.grid = basis;
-    } else if (isCode(basis)) {
+    } else if (isHexCode(basis)) {
       this.grid = codeToGrid(basis);
     } else {
       this.grid = emptyBoard();
     }
-  }
-
-  copyGrid() {
-    const gridCopy = [];
-    for (let v = 0; v < height; v++) {
-      gridCopy[v] = new Uint8Array(this.grid[v]);
-    }
-    Object.seal(gridCopy);
-    return gridCopy;
   }
 
   // If move is valid, returns valid move delta type (right, up, left, down), otherwise returns null
@@ -85,19 +77,31 @@ class Configuration {
     };
   }
 
-  allValidMoves() {
+  allValidMoves(reverse) {
     // Check for symmetries here - every move has a corresponding one with flipped dir+mag
     // Possible moves are symmetrical <=> Board is symmetrical (THAT'S NOT TRUE UGH I'M AN IDIOT)
     const validMoves = [];
     // Iterate through every grid space
     for (let v = 0; v < height; v++) {
       for (let u = 0; u < width; u++) {
-        // Only attempt moves with a ball at the "from" space
+        // Start by looking for a space with a ball, reverse or not
         if (this.grid[v][u] === 1) {
           // Generate moves from selected ball by iterating through valid deltas
           for (let w = 0; w < validMoveDeltaCount; w++) {
             const delta = validMoveDeltas[w];
-            const move = {
+            // If a reverse move is desired, the selected ball is ideally
+            // the ball that jumped during the move after it did so; otherwise
+            // it is ideally that ball before the move is made
+            const move = reverse ? {
+              from: {
+                x: u - delta.x,
+                y: v - delta.y,
+              },
+              to: {
+                x: u,
+                y: v,
+              },
+            } : {
               from: {
                 x: u,
                 y: v,
@@ -108,7 +112,7 @@ class Configuration {
               },
             };
             // Finally, validate move and determine whether to add to list
-            if (this.isValidMove(move)) validMoves.push(move);
+            if (this.isValidMove(move, reverse)) validMoves.push(move);
           }
         }
       }
@@ -169,9 +173,39 @@ class Configuration {
     return applicableSymmetries;
   }
 
+  generation(moveDiffInitial = 0, binary = false) {
+    const testConfig = new Configuration(copyGrid(this.grid));
+    const codes = new Set();
+    const reverse = moveDiffInitial < 0;
+
+    const generationRecursive = (moveDiff) => {
+      if (moveDiff === 0) {
+        codes.add(testConfig.code(binary));
+      } else {
+        const nextMoves = testConfig.allValidMoves(reverse);
+        for (let i = 0; i < nextMoves.length; i++) {
+          const nextMove = nextMoves[i];
+          testConfig.makeMove(nextMove, reverse);
+          generationRecursive(moveDiff + (reverse ? 1 : -1));
+          testConfig.makeMove(nextMove, !reverse);
+        }
+      }
+    };
+
+    generationRecursive(moveDiffInitial);
+    return codes;
+  }
+
   // VERY RESOURCE-INTENSIVE; only viable in the case of puzzles with ~10 balls or less
   // Workaround ideas: cut down by symmetry (theoretically divides base game by  at least 8)
+  //  This was attempted with solveBetter and didn't really work
   // Cache configs of certain ball counts known to be solvable
+  //  Current plan: have a cache of all of these with a ball count from a certain set
+  //  (remember: factorials) - if any of the results of a grid's set of possible next
+  //  (myBallCount - nextCountInSet) moves matches one in that part of the cache, it is solvable
+  //  The cache will of course be pre-computed (not time sensitive) and stored
+  //  (trade off memory and performance)
+  /*
   solve() {
     const testConfig = new Configuration(this.copyGrid());
     let ballCount = testConfig.countBalls();
@@ -209,9 +243,10 @@ class Configuration {
 
     return solutions;
   }
+  */
 
   solveOne() {
-    const testConfig = new Configuration(this.copyGrid());
+    const testConfig = new Configuration(copyGrid(this.grid));
     let ballCount = testConfig.countBalls();
     const moveHistory = [];
 
@@ -246,6 +281,8 @@ class Configuration {
     return solveRecursive();
   }
 
+  // ALSO VERY RESOURCE-INTENSIVE
+  /*
   solveBetter() {
     // Make a copy of this instance for safety
     const testConfig = new Configuration(this.copyGrid());
@@ -320,13 +357,14 @@ class Configuration {
     };
     return makeNode();
   }
+  */
 
   gridToString() {
     return this.grid.map((r) => Array.from(r).map((c) => ['.', 'O', ' '][c]).join(' ')).join('\n');
   }
 
-  code() {
-    return gridToCode(this.grid);
+  code(binary) {
+    return gridToCode(this.grid, binary);
   }
 }
 

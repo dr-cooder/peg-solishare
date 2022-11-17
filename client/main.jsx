@@ -55,6 +55,15 @@ const samples = {
     new Uint8Array([2, 2, 1, 1, 1, 2, 2]),
     new Uint8Array([2, 2, 1, 1, 1, 2, 2]),
   ],
+  generated: [
+    new Uint8Array([2, 2, 0, 0, 0, 2, 2]),
+    new Uint8Array([2, 2, 0, 1, 0, 2, 2]),
+    new Uint8Array([0, 0, 1, 1, 0, 0, 0]),
+    new Uint8Array([1, 1, 1, 1, 0, 0, 0]),
+    new Uint8Array([1, 1, 0, 0, 0, 0, 0]),
+    new Uint8Array([2, 2, 0, 0, 0, 2, 2]),
+    new Uint8Array([2, 2, 0, 0, 0, 2, 2]),
+  ],
   baseGame: [
     new Uint8Array([2, 2, 1, 1, 1, 2, 2]),
     new Uint8Array([2, 2, 1, 1, 1, 2, 2]),
@@ -108,7 +117,7 @@ const SolveUI = (props) => {
 }
 
 const init = () => {
-  ReactDOM.createRoot(document.getElementById('solveUIContainer')).render(<SolveUI puzzleName="disappearingAct1"/>);
+  ReactDOM.createRoot(document.getElementById('solveUIContainer')).render(<SolveUI puzzleName="generated"/>);
 }
 
 window.onload = init;

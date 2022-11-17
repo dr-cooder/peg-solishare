@@ -97,14 +97,14 @@ const symmetries = {
 };
 const symmetryKVPs = Object.entries(symmetries);
 
-const codeLength = 9;
+const hexCodeLength = 9;
 // https://stackoverflow.com/questions/1779013/check-if-string-contains-only-digits
 // https://www.sitepoint.com/using-regular-expressions-to-check-string-length/
 // https://www.webtips.dev/webtips/javascript/javascript-create-regex-from-string-variable
-const codePattern = new RegExp(`^[0-9a-f]{${codeLength}}$`);
+const hexCodePattern = new RegExp(`^[0-9a-f]{${hexCodeLength}}$`);
 
 // https://stackoverflow.com/questions/37199019/method-set-prototype-add-called-on-incompatible-receiver-undefined
-const isCode = codePattern.test.bind(codePattern);
+const isHexCode = hexCodePattern.test.bind(hexCodePattern);
 
 const isGrid = (obj) => {
   if (!obj) return false;
@@ -138,6 +138,15 @@ const isGrid = (obj) => {
   return true;
 };
 
+const copyGrid = (grid) => {
+  const gridCopy = [];
+  for (let v = 0; v < height; v++) {
+    gridCopy[v] = new Uint8Array(grid[v]);
+  }
+  Object.seal(gridCopy);
+  return gridCopy;
+};
+
 // DOES NOT VALIDATE CODE BY ITSELF FOR PERFORMANCE REASONS
 const codeToGrid = (code) => {
   // If there are no leading zeroes, the balls will be offset
@@ -161,7 +170,7 @@ const codeToGrid = (code) => {
 };
 
 // DOES NOT VALIDATE GRID BY ITSELF FOR PERFORMANCE REASONS
-const gridToCode = (grid) => {
+const gridToCode = (grid, binary) => {
   let codeBin = '';
 
   // "Read" balls left to right, top to bottom
@@ -176,7 +185,8 @@ const gridToCode = (grid) => {
     }
   }
 
-  return parseInt(codeBin, 2).toString(16).padStart(codeLength, '0');
+  if (binary) return codeBin;
+  return parseInt(codeBin, 2).toString(16).padStart(hexCodeLength, '0');
 };
 
 module.exports = {
@@ -188,8 +198,9 @@ module.exports = {
   validMoveDeltaCount,
   symmetries,
   symmetryKVPs,
-  isCode,
+  isHexCode,
   isGrid,
+  copyGrid,
   codeToGrid,
   gridToCode,
 };
