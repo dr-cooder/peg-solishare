@@ -1,4 +1,5 @@
 const Configuration = require('./Configuration.js');
+const GameBoardUI = require('./GameBoardUI.jsx');
 
 const samples = {
   disappearingAct1: [
@@ -106,7 +107,7 @@ const SolveUI = (props) => {
     setStepNodes(solution.map((step, index) => {
       return (
         <li key={index}>
-          {'('}{step.from.x}, {step.from.y}{')'} <i className="fa fa-solid fa-arrow-right"></i> {'('}{step.to.x}, {step.to.y}{')'}
+          {'('}{step.from.x + 1}, {step.from.y + 1}{')'} <i className="fa fa-solid fa-arrow-right"></i> {'('}{step.to.x + 1}, {step.to.y + 1}{')'}
         </li>
       );
     }));
@@ -114,6 +115,8 @@ const SolveUI = (props) => {
 
   return (
     <>
+      <div><GameBoardUI /></div>
+      <div>The selected puzzle is: {props.puzzleName}</div>
       <button id="solveButton" type="button" className="btn btn-primary" disabled={solving}
         onClick={() => {
           const code = new Configuration(samples[props.puzzleName]).code();
@@ -126,7 +129,7 @@ const SolveUI = (props) => {
 }
 
 const init = () => {
-  ReactDOM.createRoot(document.getElementById('solveUIContainer')).render(<SolveUI puzzleName="generated2"/>);
+  ReactDOM.createRoot(document.getElementById('app')).render(<SolveUI puzzleName="generated2"/>);
 }
 
 window.onload = init;

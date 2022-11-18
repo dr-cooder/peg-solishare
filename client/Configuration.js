@@ -199,56 +199,10 @@ class Configuration {
     return codes;
   }
 
-  // VERY RESOURCE-INTENSIVE; only viable in the case of puzzles with ~10 balls or less
-  // Workaround ideas: cut down by symmetry (theoretically divides base game by  at least 8)
-  //  This was attempted with solveBetter and didn't really work
-  // Cache configs of certain ball counts known to be solvable
-  //  Current plan: have a cache of all of these with a ball count from a certain set
-  //  (remember: factorials) - if any of the results of a grid's set of possible next
-  //  (myBallCount - nextCountInSet) moves matches one in that part of the cache, it is solvable
-  //  The cache will of course be pre-computed (not time sensitive) and stored
-  //  (trade off memory and performance)
-  /*
+  // DO NOT CALL WITHOUT VERIFYING THE GRID IS SOLVABLE FIRST
+  // If solve is called on an unsolvable grid, this will be found the "hard way" resource-wise;
+  // Every possible set of moves will be made only for the function to return null
   solve() {
-    const testConfig = new Configuration(this.copyGrid());
-    let ballCount = testConfig.countBalls();
-    const moveHistory = [];
-    const solutions = [];
-
-    const solveRecursive = () => {
-      if (ballCount === 4) {
-        // If a win state has been reached, register the move history as a solution
-        const foundSolution = Array.from(moveHistory);
-        solutions.push(foundSolution);
-      } else {
-        // check for symmetries
-        // For every possible move
-        const moves = testConfig.allValidMoves();
-        for (let i = 0; i < moves.length; i++) {
-          const move = moves[i];
-
-          // Make the move and add it to the record
-          testConfig.makeMove(move);
-          ballCount--;
-          moveHistory.push(move);
-
-          // Keep branching, wait until all sub-branches are done
-          solveRecursive();
-
-          // Undo the move and remove it from the record
-          testConfig.makeMove(move, true);
-          ballCount++;
-          moveHistory.pop();
-        }
-      }
-    };
-    solveRecursive();
-
-    return solutions;
-  }
-  */
-
-  solveOne() {
     const testConfig = new Configuration(copyGrid(this.grid));
     let ballCount = testConfig.countBalls();
     const moveHistory = [];
@@ -283,84 +237,6 @@ class Configuration {
 
     return solveRecursive();
   }
-
-  // ALSO VERY RESOURCE-INTENSIVE
-  /*
-  solveBetter() {
-    // Make a copy of this instance for safety
-    const testConfig = new Configuration(this.copyGrid());
-    let ballCount = testConfig.countBalls();
-    const makeNode = (move) => {
-      const newNode = {
-        moveFromParent: move,
-        children: [],
-      };
-
-      if (move) {
-        testConfig.makeMove(move);
-        ballCount--;
-      }
-
-      const symmetryNames = testConfig.getSymmetries();
-      newNode.symmetries = symmetryNames;
-      const nextMoves = testConfig.allValidMoves();
-      const nextMovesLength = nextMoves.length;
-
-      // Cull next moves according to each observed symmetry
-      for (let i = 0; i < symmetryNames.length; i++) {
-        const currentSymmetryFunc = symmetries[symmetryNames[i]];
-        for (let j = 0; j < nextMovesLength; j++) {
-          // Pick a move, and determine its symmetry-transformed counterpart
-          const baseMove = nextMoves[j];
-          if (baseMove) {
-            const movePrimeActualFrom = currentSymmetryFunc(baseMove.from);
-            const movePrimeActualTo = currentSymmetryFunc(baseMove.to);
-            for (let k = 0; k < nextMovesLength; k++) {
-              // Avoid possibility of move getting culled by itself;
-              // certain transforms on certain points can be identity
-              if (j !== k) {
-                // If another move on the list matches the image, cull it;
-                // it is redundant because it and its branches can simply be replicated
-                // by applying the transform to the pre-image and all of its branches.
-                const movePrimeExpected = nextMoves[k];
-                if (movePrimeExpected) {
-                  const {
-                    from: movePrimeExpectedFrom,
-                    to: movePrimeExpectedTo,
-                  } = movePrimeExpected;
-                  if (movePrimeExpectedFrom.x === movePrimeActualFrom.x
-                    && movePrimeExpectedFrom.y === movePrimeActualFrom.y
-                    && movePrimeExpectedTo.x === movePrimeActualTo.x
-                    && movePrimeExpectedTo.y === movePrimeActualTo.y) {
-                    nextMoves[k] = null;
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-
-      for (let i = 0; i < nextMovesLength; i++) {
-        const nextMove = nextMoves[i];
-        if (nextMove) {
-          const child = makeNode(nextMove);
-          if (child.children.length !== 0 || ballCount === 1) {
-            newNode.children.push(child);
-          }
-        }
-      }
-
-      if (move) {
-        testConfig.makeMove(move, true);
-        ballCount++;
-      }
-
-      return newNode;
-    };
-    return makeNode();
-  }
-  */
 
   gridToString() {
     return this.grid.map((r) => Array.from(r).map((c) => ['.', 'O', ' '][c]).join(' ')).join('\n');

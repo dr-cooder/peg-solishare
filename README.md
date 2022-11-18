@@ -2,8 +2,9 @@
 ## Idea
 In Peg SoliShare, players can play Peg Solitaire puzzles created by other players around the world, or create and share their own puzzles with the world.
 ## Inspiration
-- "Disappearing Act" puzzle series from Professor Layton and Pandora's Box / the Diabolical Box
-- Super Mario Maker series
+- Peg Solitaire and its sub-puzzles: "Disappearing Act" puzzle series from Professor Layton and Pandora's Box / the Diabolical Box
+- User-generated level platform: Super Mario Maker series
+- Name of solvable puzzle cache (sacredTimeline): Loki (TV series)
 ## External Code
 ### Help and Snippets
 - https://stackoverflow.com/questions/36562953/converting-binary-to-hexadecimal
@@ -18,10 +19,12 @@ In Peg SoliShare, players can play Peg Solitaire puzzles created by other player
 - https://youtu.be/R4vV4szAoDY
 - https://www.geeksforgeeks.org/node-js-fs-read-method/
 - https://github.com/nodejs/node/issues/37320
+- https://stackoverflow.com/questions/2745432/best-way-to-detect-that-html5-canvas-is-not-supported
 - Bootstrap documentation
 ### External Components
 - Bootstrap
 ## To-Do
+- Change terminology: grid => puzzle, configuration => game
 - Server-side functionality of taking a grid code and list of all previous moves, determining if it is solvable (short-circuiting if the base puzzle is not), if so finding a solution and returning probably only the first move of it (in other words a hint); otherwise determining how many undos are required for a solvable grid.
 - Canvas-based game UI for gameplay; drag and drop balls, interface with Configuration class (don't have any solving behavior client-side though)
 - Puzzle-creation UI similar to above only balls are either placed manually or generated from reverse-moves; after which it can be uploaded (after being verified as solvable of course)
