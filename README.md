@@ -16,6 +16,7 @@ In Peg SoliShare, players can play Peg Solitaire puzzles created by other player
 - https://www.webtips.dev/webtips/javascript/javascript-create-regex-from-string-variable
 - https://stackoverflow.com/questions/37199019/method-set-prototype-add-called-on-incompatible-receiver-undefined
 - https://youtu.be/R4vV4szAoDY
+- https://www.geeksforgeeks.org/node-js-fs-read-method/
 - Bootstrap documentation
 ### External Components
 - Bootstrap

@@ -7,6 +7,7 @@ const {
   // symmetries,
   symmetryKVPs,
   isHexCode,
+  isBinCode,
   isGrid,
   copyGrid,
   codeToGrid,
@@ -22,6 +23,8 @@ class Configuration {
       this.grid = basis;
     } else if (isHexCode(basis)) {
       this.grid = codeToGrid(basis);
+    } else if (isBinCode(basis)) {
+      this.grid = codeToGrid(basis, true);
     } else {
       this.grid = emptyBoard();
     }

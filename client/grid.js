@@ -98,13 +98,16 @@ const symmetries = {
 const symmetryKVPs = Object.entries(symmetries);
 
 const hexCodeLength = 9;
+
 // https://stackoverflow.com/questions/1779013/check-if-string-contains-only-digits
 // https://www.sitepoint.com/using-regular-expressions-to-check-string-length/
 // https://www.webtips.dev/webtips/javascript/javascript-create-regex-from-string-variable
 const hexCodePattern = new RegExp(`^[0-9a-f]{${hexCodeLength}}$`);
-
 // https://stackoverflow.com/questions/37199019/method-set-prototype-add-called-on-incompatible-receiver-undefined
 const isHexCode = hexCodePattern.test.bind(hexCodePattern);
+
+const binCodePattern = new RegExp(`^[01]{${spaces}}$`);
+const isBinCode = binCodePattern.test.bind(binCodePattern);
 
 const isGrid = (obj) => {
   if (!obj) return false;
@@ -148,9 +151,10 @@ const copyGrid = (grid) => {
 };
 
 // DOES NOT VALIDATE CODE BY ITSELF FOR PERFORMANCE REASONS
-const codeToGrid = (code) => {
+const codeToGrid = (code, binary) => {
   // If there are no leading zeroes, the balls will be offset
-  const codeBin = parseInt(code, 16).toString(2).padStart(spaces, '0');
+  // Also if the code is already in binary obviously no conversion is warranted
+  const codeBin = binary ? code : parseInt(code, 16).toString(2).padStart(spaces, '0');
   const grid = emptyBoard();
 
   // "Print" balls left to right, top to bottom
@@ -199,6 +203,7 @@ module.exports = {
   symmetries,
   symmetryKVPs,
   isHexCode,
+  isBinCode,
   isGrid,
   copyGrid,
   codeToGrid,
