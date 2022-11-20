@@ -20,11 +20,4 @@ module.exports = {
     path: path.resolve(__dirname, 'hosted'),
     filename: '[name]Bundle.js',
   },
-  // https://stackoverflow.com/questions/33154285/exclude-react-from-webpack-bundle
-  // https://webpack.js.org/configuration/externals/
-  externals: {
-    react: 'React',
-    'react-dom': 'ReactDOM',
-    'react-router': 'ReactRouter',
-  },
 };

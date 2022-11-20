@@ -8,25 +8,25 @@ const {
   symmetryKVPs,
   isHexCode,
   isBinCode,
-  isGrid,
-  copyGrid,
-  codeToGrid,
-  gridToCode,
-} = require('./grid.js');
+  isPuzzle,
+  copyPuzzle,
+  codeToPuzzle,
+  puzzleToCode,
+} = require('./puzzle.js');
 
-class Configuration {
+class Game {
   constructor(basis) {
     if (!basis) {
-      this.grid = emptyBoard();
-    } else if (isGrid(basis)) {
-      // It is assumed that the passed-in grid is not an undesired shallow copy
-      this.grid = basis;
+      this.puzzle = emptyBoard();
+    } else if (isPuzzle(basis)) {
+      // It is assumed that the passed-in puzzle is not an undesired shallow copy
+      this.puzzle = basis;
     } else if (isHexCode(basis)) {
-      this.grid = codeToGrid(basis);
+      this.puzzle = codeToPuzzle(basis);
     } else if (isBinCode(basis)) {
-      this.grid = codeToGrid(basis, true);
+      this.puzzle = codeToPuzzle(basis, true);
     } else {
-      this.grid = emptyBoard();
+      this.puzzle = emptyBoard();
     }
   }
 
@@ -66,9 +66,9 @@ class Configuration {
     const spaceFromExpected = reverse ? 0 : 1;
     const spaceMidExpected = reverse ? 0 : 1;
     const spaceToExpected = reverse ? 1 : 0;
-    if (!(this.grid[fromY][fromX] === spaceFromExpected
-      && this.grid[midY][midX] === spaceMidExpected
-      && this.grid[toY][toX] === spaceToExpected)) return null;
+    if (!(this.puzzle[fromY][fromX] === spaceFromExpected
+      && this.puzzle[midY][midX] === spaceMidExpected
+      && this.puzzle[toY][toX] === spaceToExpected)) return null;
 
     // Move is valid!
     return {
@@ -84,11 +84,11 @@ class Configuration {
     // Check for symmetries here - every move has a corresponding one with flipped dir+mag
     // Possible moves are symmetrical <=> Board is symmetrical (THAT'S NOT TRUE UGH I'M AN IDIOT)
     const validMoves = [];
-    // Iterate through every grid space
+    // Iterate through every puzzle space
     for (let v = 0; v < height; v++) {
       for (let u = 0; u < width; u++) {
         // Start by looking for a space with a ball, reverse or not
-        if (this.grid[v][u] === 1) {
+        if (this.puzzle[v][u] === 1) {
           // Generate moves from selected ball by iterating through valid deltas
           for (let w = 0; w < validMoveDeltaCount; w++) {
             const delta = validMoveDeltas[w];
@@ -123,7 +123,7 @@ class Configuration {
     return validMoves;
   }
 
-  // If move is valid, applies the move to the grid
+  // If move is valid, applies the move to the puzzle
   makeMove(move, reverse) {
     const moveIsValid = this.isValidMove(move, reverse);
     if (!moveIsValid) return;
@@ -136,16 +136,16 @@ class Configuration {
     const midAfter = reverse ? 1 : 0;
     const toAfter = reverse ? 0 : 1;
 
-    this.grid[moveFrom.y][moveFrom.x] = fromAfter;
-    this.grid[moveMid.y][moveMid.x] = midAfter;
-    this.grid[moveTo.y][moveTo.x] = toAfter;
+    this.puzzle[moveFrom.y][moveFrom.x] = fromAfter;
+    this.puzzle[moveMid.y][moveMid.x] = midAfter;
+    this.puzzle[moveTo.y][moveTo.x] = toAfter;
   }
 
   countBalls() {
     let ballCount = 0;
     for (let v = 0; v < height; v++) {
       for (let u = 0; u < width; u++) {
-        if (this.grid[v][u] === 1) ballCount++;
+        if (this.puzzle[v][u] === 1) ballCount++;
       }
     }
     return ballCount;
@@ -162,7 +162,7 @@ class Configuration {
         for (let u = 0; u < width; u++) {
           // SKIP IF NO SLOT
           const { x: uPrime, y: vPrime } = symmentryTransform({ x: u, y: v });
-          if (this.grid[v][u] !== this.grid[vPrime][uPrime]) {
+          if (this.puzzle[v][u] !== this.puzzle[vPrime][uPrime]) {
             symmetryApplicable = false;
             break;
           }
@@ -177,20 +177,20 @@ class Configuration {
   }
 
   generation(moveDiffInitial = 0, binary = false) {
-    const testConfig = new Configuration(copyGrid(this.grid));
+    const testGame = new Game(copyPuzzle(this.puzzle));
     const codes = new Set();
     const reverse = moveDiffInitial < 0;
 
     const generationRecursive = (moveDiff) => {
       if (moveDiff === 0) {
-        codes.add(testConfig.code(binary));
+        codes.add(testGame.code(binary));
       } else {
-        const nextMoves = testConfig.allValidMoves(reverse);
+        const nextMoves = testGame.allValidMoves(reverse);
         for (let i = 0; i < nextMoves.length; i++) {
           const nextMove = nextMoves[i];
-          testConfig.makeMove(nextMove, reverse);
+          testGame.makeMove(nextMove, reverse);
           generationRecursive(moveDiff + (reverse ? 1 : -1));
-          testConfig.makeMove(nextMove, !reverse);
+          testGame.makeMove(nextMove, !reverse);
         }
       }
     };
@@ -199,12 +199,12 @@ class Configuration {
     return codes;
   }
 
-  // DO NOT CALL WITHOUT VERIFYING THE GRID IS SOLVABLE FIRST
-  // If solve is called on an unsolvable grid, this will be found the "hard way" resource-wise;
+  // DO NOT CALL WITHOUT VERIFYING THE PUZZLE IS SOLVABLE FIRST
+  // If solve is called on an unsolvable puzzle, this will be found the "hard way" resource-wise;
   // Every possible set of moves will be made only for the function to return null
   solve() {
-    const testConfig = new Configuration(copyGrid(this.grid));
-    let ballCount = testConfig.countBalls();
+    const testGame = new Game(copyPuzzle(this.puzzle));
+    let ballCount = testGame.countBalls();
     const moveHistory = [];
 
     const solveRecursive = () => {
@@ -214,12 +214,12 @@ class Configuration {
       }
       // check for symmetries
       // For every possible move
-      const moves = testConfig.allValidMoves();
+      const moves = testGame.allValidMoves();
       for (let i = 0; i < moves.length; i++) {
         const move = moves[i];
 
         // Make the move and add it to the record
-        testConfig.makeMove(move);
+        testGame.makeMove(move);
         ballCount--;
         moveHistory.push(move);
 
@@ -228,7 +228,7 @@ class Configuration {
         if (solution) return solution;
 
         // Undo the move and remove it from the record
-        testConfig.makeMove(move, true);
+        testGame.makeMove(move, true);
         ballCount++;
         moveHistory.pop();
       }
@@ -238,13 +238,13 @@ class Configuration {
     return solveRecursive();
   }
 
-  gridToString() {
-    return this.grid.map((r) => Array.from(r).map((c) => ['.', 'O', ' '][c]).join(' ')).join('\n');
+  puzzleToString() {
+    return this.puzzle.map((r) => Array.from(r).map((c) => ['.', 'O', ' '][c]).join(' ')).join('\n');
   }
 
   code(binary) {
-    return gridToCode(this.grid, binary);
+    return puzzleToCode(this.puzzle, binary);
   }
 }
 
-module.exports = Configuration;
+module.exports = Game;

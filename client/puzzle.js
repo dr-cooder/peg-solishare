@@ -1,12 +1,12 @@
-// GRID LEGEND
+// PUZZLE LEGEND
 // 0: Empty slot
 // 1: Ball
 // 2: No slot
 
 // emptyBoard is a function to ensure that a deep copy of the template is created then returned
-// Also notice the format is grid[y][x], so no diagonal mirroring is necessary
+// Also notice the format is puzzle[y][x], so no diagonal mirroring is necessary
 const emptyBoard = () => {
-  const grid = [
+  const puzzle = [
     new Uint8Array([2, 2, 0, 0, 0, 2, 2]),
     new Uint8Array([2, 2, 0, 0, 0, 2, 2]),
     new Uint8Array([0, 0, 0, 0, 0, 0, 0]),
@@ -16,8 +16,8 @@ const emptyBoard = () => {
     new Uint8Array([2, 2, 0, 0, 0, 2, 2]),
   ];
   // https://stackoverflow.com/questions/21988909/is-it-possible-to-create-a-fixed-length-array-in-javascript
-  Object.seal(grid);
-  return grid;
+  Object.seal(puzzle);
+  return puzzle;
 };
 const width = 7;
 const height = 7;
@@ -109,7 +109,7 @@ const isHexCode = hexCodePattern.test.bind(hexCodePattern);
 const binCodePattern = new RegExp(`^[01]{${spaces}}$`);
 const isBinCode = binCodePattern.test.bind(binCodePattern);
 
-const isGrid = (obj) => {
+const isPuzzle = (obj) => {
   if (!obj) return false;
   const emptyBoardInst = emptyBoard();
 
@@ -141,26 +141,26 @@ const isGrid = (obj) => {
   return true;
 };
 
-const copyGrid = (grid) => {
-  const gridCopy = [];
+const copyPuzzle = (puzzle) => {
+  const puzzleCopy = [];
   for (let v = 0; v < height; v++) {
-    gridCopy[v] = new Uint8Array(grid[v]);
+    puzzleCopy[v] = new Uint8Array(puzzle[v]);
   }
-  Object.seal(gridCopy);
-  return gridCopy;
+  Object.seal(puzzleCopy);
+  return puzzleCopy;
 };
 
 // DOES NOT VALIDATE CODE BY ITSELF FOR PERFORMANCE REASONS
-const codeToGrid = (code, binary) => {
+const codeToPuzzle = (code, binary) => {
   // If there are no leading zeroes, the balls will be offset
   // Also if the code is already in binary obviously no conversion is warranted
   const codeBin = binary ? code : parseInt(code, 16).toString(2).padStart(spaces, '0');
-  const grid = emptyBoard();
+  const puzzle = emptyBoard();
 
   // "Print" balls left to right, top to bottom
   let i = 0;
   for (let v = 0; v < height; v++) {
-    const row = grid[v];
+    const row = puzzle[v];
     for (let u = 0; u < width; u++) {
       // Skip over non-spaces
       if (row[u] !== 2) {
@@ -170,16 +170,16 @@ const codeToGrid = (code, binary) => {
     }
   }
 
-  return grid;
+  return puzzle;
 };
 
 // DOES NOT VALIDATE GRID BY ITSELF FOR PERFORMANCE REASONS
-const gridToCode = (grid, binary) => {
+const puzzleToCode = (puzzle, binary) => {
   let codeBin = '';
 
   // "Read" balls left to right, top to bottom
   for (let v = 0; v < height; v++) {
-    const row = grid[v];
+    const row = puzzle[v];
     for (let u = 0; u < width; u++) {
       const space = row[u];
       // Skip over non-spaces
@@ -204,8 +204,8 @@ module.exports = {
   symmetryKVPs,
   isHexCode,
   isBinCode,
-  isGrid,
-  copyGrid,
-  codeToGrid,
-  gridToCode,
+  isPuzzle,
+  copyPuzzle,
+  codeToPuzzle,
+  puzzleToCode,
 };

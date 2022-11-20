@@ -1,4 +1,4 @@
-const Configuration = require('./Configuration.js');
+const Game = require('./Game.js');
 const GameBoardUI = require('./GameBoardUI.jsx');
 
 const samples = {
@@ -119,7 +119,7 @@ const SolveUI = (props) => {
       <div>The selected puzzle is: {props.puzzleName}</div>
       <button id="solveButton" type="button" className="btn btn-primary" disabled={solving}
         onClick={() => {
-          const code = new Configuration(samples[props.puzzleName]).code();
+          const code = new Game(samples[props.puzzleName]).code();
           getSolution(code);//.catch(somethingWentWrong);
         }}>Solve!</button>
       <h3>{status}</h3>
