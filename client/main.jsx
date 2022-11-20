@@ -1,5 +1,6 @@
-const Game = require('./Game.js');
+const { puzzleToCode } = require('./puzzle.js');
 const GameBoardUI = require('./GameBoardUI.jsx');
+const { useState, createRef } = React;
 
 const samples = {
   disappearingAct1: [
@@ -85,51 +86,61 @@ const samples = {
   ],
 };
 
-const SolveUI = (props) => {
-  const [status, setStatus] = React.useState();
-  const [stepNodes, setStepNodes] = React.useState();
-  const [solving, setSolving] = React.useState(false);
+const GamePage = (props) => {
+  const [hintText, setHintText] = useState();
+  const [hintWaiting, setHintWaiting] = useState(false);
+  const gameRef = createRef();
 
   const somethingWentWrong = () => {
-    setSolving(false);
-    setStatus('Something went wrong...');
+    setHintWaiting(false);
+    setHintText('Something went wrong...');
   }
 
-  const getSolution = async (code) => {
-    if (solving) return null;
-    setSolving(true);
-    setStatus('Calculating solution...');
-    const { solution } = await (
-      await fetch(`/solve?code=${code}`).catch(somethingWentWrong)
+  const getHint = async (code) => {
+    if (hintWaiting) return null;
+    setHintWaiting(true);
+    setHintText('Awaiting hint...');
+    const { hint, unsolvable, alreadySolved } = await (
+      await fetch(`/hint?code=${code}`).catch(somethingWentWrong)
       ).json().catch(somethingWentWrong);
-    setSolving(false);
-    setStatus('Solution found!');
-    setStepNodes(solution.map((step, index) => {
-      return (
-        <li key={index}>
-          {'('}{step.from.x + 1}, {step.from.y + 1}{')'} <i className="fa fa-solid fa-arrow-right"></i> {'('}{step.to.x + 1}, {step.to.y + 1}{')'}
-        </li>
-      );
-    }));
+    setHintWaiting(false);
+    if (unsolvable) {
+      setHintText('Not solvable from this point! Please undo.');
+    } else if (alreadySolved) {
+      setHintText('This puzzle has already been solved!');
+    } else if (hint) {
+      setHintText(<>
+        {'('}{hint.from.x + 1}, {hint.from.y + 1}{')'} <i className="fa fa-solid fa-arrow-right"></i> {'('}{hint.to.x + 1}, {hint.to.y + 1}{')'}
+      </>);
+    } else {
+      setHintText('Unexpected server response...');
+    }
+  }
+
+  const handleMove = () => {
+    setHintText('');
   }
 
   return (
     <>
-      <div><GameBoardUI /></div>
+      <div><GameBoardUI ref={gameRef} code={puzzleToCode(samples[props.puzzleName])} onMove={handleMove}/></div>
       <div>The selected puzzle is: {props.puzzleName}</div>
-      <button id="solveButton" type="button" className="btn btn-primary" disabled={solving}
+      <button id="hintButton" type="button" className="btn btn-warning" disabled={hintWaiting}
         onClick={() => {
-          const code = new Game(samples[props.puzzleName]).code();
-          getSolution(code);//.catch(somethingWentWrong);
-        }}>Solve!</button>
-      <h3>{status}</h3>
-      <ol id="steps">{stepNodes}</ol>
+          // Actually get the current code of the game board UI
+          getHint(gameRef.current.code());
+        }}><i className="fa-regular fa-lightbulb"></i> Hint</button>
+      <button id="undoButton" type="button" className="btn btn-secondary" disabled={hintWaiting}
+        onClick={() => {
+          gameRef.current.undo();
+        }}><i className="fa-solid fa-arrow-rotate-left"></i> Undo</button>
+      <h3>{hintText}</h3>
     </>
   );
 }
 
 const init = () => {
-  ReactDOM.createRoot(document.getElementById('app')).render(<SolveUI puzzleName="generated2"/>);
+  ReactDOM.createRoot(document.getElementById('app')).render(<GamePage puzzleName="generated2"/>);
 }
 
 window.onload = init;

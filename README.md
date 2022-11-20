@@ -20,6 +20,7 @@ In Peg SoliShare, players can play Peg Solitaire puzzles created by other player
 - https://www.geeksforgeeks.org/node-js-fs-read-method/
 - https://github.com/nodejs/node/issues/37320
 - https://stackoverflow.com/questions/2745432/best-way-to-detect-that-html5-canvas-is-not-supported
+- https://medium.com/@pdx.lucasm/canvas-with-react-js-32e133c05258
 - Bootstrap documentation
 ### External Components
 - Bootstrap

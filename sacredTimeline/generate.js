@@ -117,7 +117,7 @@ if (ballCount === 1) {
                     const parentMove = parentMoves[j];
                     game.makeMove(parentMove, true);
                     solvables.add(game.code(true));
-                    game.makeMove(parentMove);
+                    game.undo(true);
                   }
                 }
               }

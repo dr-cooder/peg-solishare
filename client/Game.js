@@ -28,12 +28,13 @@ class Game {
     } else {
       this.puzzle = emptyBoard();
     }
+    this.moveHistory = [];
   }
 
   // If move is valid, returns valid move delta type (right, up, left, down), otherwise returns null
-  isValidMove(move, reverse) {
+  validateMove(move, reverse) {
     // Ensure passed-in move has the required properties
-    if (!(move.from && typeof move.from.x === 'number' && typeof move.from.y === 'number'
+    if (!(move && move.from && typeof move.from.x === 'number' && typeof move.from.y === 'number'
       && move.to && typeof move.to.x === 'number' && typeof move.from.y === 'number')) return null;
     const fromX = move.from.x;
     const fromY = move.from.y;
@@ -115,7 +116,7 @@ class Game {
               },
             };
             // Finally, validate move and determine whether to add to list
-            if (this.isValidMove(move, reverse)) validMoves.push(move);
+            if (this.validateMove(move, reverse)) validMoves.push(move);
           }
         }
       }
@@ -123,11 +124,11 @@ class Game {
     return validMoves;
   }
 
-  // If move is valid, applies the move to the puzzle
-  makeMove(move, reverse) {
-    const moveIsValid = this.isValidMove(move, reverse);
-    if (!moveIsValid) return;
-    const { moveMid } = moveIsValid;
+  // If move is valid, applies the move to the puzzle and returns true. Otherwise returns false.
+  makeMove(move, reverse, dontAddToHistory) {
+    const moveValidation = this.validateMove(move, reverse);
+    if (!moveValidation) return false;
+    const { moveMid } = moveValidation;
 
     const moveFrom = move.from;
     const moveTo = move.to;
@@ -139,6 +140,14 @@ class Game {
     this.puzzle[moveFrom.y][moveFrom.x] = fromAfter;
     this.puzzle[moveMid.y][moveMid.x] = midAfter;
     this.puzzle[moveTo.y][moveTo.x] = toAfter;
+
+    if (!dontAddToHistory) this.moveHistory.push(move);
+
+    return true;
+  }
+
+  undo(reverse) {
+    this.makeMove(this.moveHistory.pop(), !reverse, true);
   }
 
   countBalls() {
@@ -190,7 +199,7 @@ class Game {
           const nextMove = nextMoves[i];
           testGame.makeMove(nextMove, reverse);
           generationRecursive(moveDiff + (reverse ? 1 : -1));
-          testGame.makeMove(nextMove, !reverse);
+          testGame.undo(reverse);
         }
       }
     };
@@ -199,18 +208,20 @@ class Game {
     return codes;
   }
 
+  // THIS IS AN OBSOLETE FUNCTION - solving, giving hints, and verifying solvability
+  // is to be done server-side via the Sacred Timeline
   // DO NOT CALL WITHOUT VERIFYING THE PUZZLE IS SOLVABLE FIRST
   // If solve is called on an unsolvable puzzle, this will be found the "hard way" resource-wise;
   // Every possible set of moves will be made only for the function to return null
   solve() {
     const testGame = new Game(copyPuzzle(this.puzzle));
     let ballCount = testGame.countBalls();
-    const moveHistory = [];
+    const testMoveHistory = [];
 
     const solveRecursive = () => {
       if (ballCount === 1) {
         // If a win state has been reached, register the move history as a solution
-        return moveHistory;
+        return testMoveHistory;
       }
       // check for symmetries
       // For every possible move
@@ -221,7 +232,7 @@ class Game {
         // Make the move and add it to the record
         testGame.makeMove(move);
         ballCount--;
-        moveHistory.push(move);
+        testMoveHistory.push(move);
 
         // Keep branching, wait until all sub-branches are done
         const solution = solveRecursive();
@@ -230,7 +241,7 @@ class Game {
         // Undo the move and remove it from the record
         testGame.makeMove(move, true);
         ballCount++;
-        moveHistory.pop();
+        testMoveHistory.pop();
       }
       return null;
     };
@@ -238,6 +249,7 @@ class Game {
     return solveRecursive();
   }
 
+  // Just for testing purposes
   puzzleToString() {
     return this.puzzle.map((r) => Array.from(r).map((c) => ['.', 'O', ' '][c]).join(' ')).join('\n');
   }

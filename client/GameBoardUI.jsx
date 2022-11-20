@@ -1,32 +1,73 @@
 const {
-  useRef, useEffect, useState,
+  Component, createRef,
 } = React;
+const { distanceNoSqrt } = require('./helpers.js');
+const Game = require('./Game.js');
+const { emptyBoard, width, height } = require('./puzzle.js');
 
-const GameBoardUI = (props) => {
-  // https://medium.com/@pdx.lucasm/canvas-with-react-js-32e133c05258
-  const canvasRef = useRef(null);
-  const canvasOuterRef = useRef(null);
-  const [holdingBall, setHoldingBall] = useState(false);
+class GameBoardUI extends Component {
+  constructor(props) {
+    super(props);
+    this.canvasRef = createRef();
+    this.canvasOuterRef = createRef();
+    this.game = new Game(props.code);
 
-  useEffect(() => {
-    const canvasEl = canvasRef.current;
-    const canvasOuterEl = canvasOuterRef.current;
+    this.code = (binary) => {
+      return this.game.code(binary);
+    }
+  
+    this.undo = (reverse) => {
+      this.game.undo(reverse);
+      this.props.onMove();
+    }
+  }
+
+  componentDidMount() {
+    // https://medium.com/@pdx.lucasm/canvas-with-react-js-32e133c05258
+    const canvasEl = this.canvasRef.current;
+    const canvasWidth = canvasEl.width;
+    const canvasHeight = canvasEl.height;
+    const canvasOuterEl = this.canvasOuterRef.current;
     const ctx = canvasEl.getContext('2d');
 
-    let mouseX = 300;
-    let mouseY = 300;
+    const emptyBoardRef = emptyBoard();
+    const gridTop = 100;
+    const gridLeft = 100;
+    const gridWidth = 400;
+    const gridHeight = 400;
+    const spaceWidth = gridWidth / width;
+    const spaceHeight = gridHeight / height;
+    const ballRadius = 20;
+    const ballRadiusSquared = ballRadius * ballRadius;
 
+    const ballSpaces = [];
+    for (let v = 0; v < height; v++) {
+      const thisRow = [];
+      const thisRowY = spaceHeight * (v + 0.5) + gridTop;
+      for (let u = 0; u < width; u++) {
+        if (emptyBoardRef[v][u] !== 2) {
+          thisRow[u] = {
+            x: spaceWidth * (u + 0.5) + gridLeft,
+            y: thisRowY
+          };
+        }
+      }
+      ballSpaces[v] = thisRow;
+    }
+
+    let mouseX = canvasWidth / 2;
+    let mouseY = canvasHeight / 2;
     const updateMouse = (e) => {
       if (!e) return;
 
       let rawX;
       let rawY;
 
-      // https://stackoverflow.com/questions/60688935/my-canvas-drawing-app-wont-work-on-mobile/60689429#60689429
-      if (e.type === 'touchmove') {
+      const inputType = e.type.slice(0, 5);
+      if (inputType === 'touch') {
         rawX = e.touches[0].pageX;
         rawY = e.touches[0].pageY;
-      } else if (e.type === 'mousemove') {
+      } else if (inputType === 'mouse') {
         rawX = e.pageX;
         rawY = e.pageY;
       }
@@ -37,29 +78,115 @@ const GameBoardUI = (props) => {
         * (canvasEl.height / canvasOuterEl.offsetHeight);
     };
 
-    window.addEventListener('mousemove', updateMouse);
+    let mouseGridX = Math.floor(width / 2);
+    let mouseGridY = Math.floor(height / 2);
+    const updateMouseGrid = (e) => {
+      updateMouse(e);
+      mouseGridX = Math.floor((mouseX - gridLeft) / spaceWidth);
+      mouseGridY = Math.floor((mouseY - gridTop) / spaceHeight);
+    }
+
+    let holdingBall = false;
+    let tempMoveX = 0;
+    let tempMoveY = 0;
+    const pickUpBall = (e) => {
+      updateMouseGrid(e);
+      if (this.game.puzzle[mouseGridY][mouseGridX] === 1) {
+        const thisBallSpace = ballSpaces[mouseGridY][mouseGridX];
+        if (thisBallSpace
+          && distanceNoSqrt(mouseX, mouseY, thisBallSpace.x, thisBallSpace.y) < ballRadiusSquared) {
+          holdingBall = true;
+          tempMoveX = mouseGridX;
+          tempMoveY = mouseGridY;
+        }
+      }
+    }
+
+    const dropBall = (e) => {
+      if (!holdingBall) return;
+      holdingBall = false;
+      updateMouseGrid(e);
+      const newMove = {
+        from: {
+          x: tempMoveX,
+          y: tempMoveY,
+        },
+        to: {
+          x: mouseGridX,
+          y: mouseGridY,
+        }
+      }
+      if (this.game.makeMove(newMove)) this.props.onMove();
+    }
+
+    canvasOuterEl.onmousedown = pickUpBall;
+    canvasOuterEl.onmousemove = updateMouse;
+    canvasOuterEl.onmouseup = dropBall;
+    canvasOuterEl.onmouseout = dropBall;
+
+    canvasOuterEl.ontouchstart = pickUpBall;
+    canvasOuterEl.ontouchmove = updateMouse;
+    canvasOuterEl.ontouchend = dropBall;
+    canvasOuterEl.ontouchcancel = dropBall;
+
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = 'black';
+    ctx.fillStyle = 'black';
 
     const loop = () => {
       requestAnimationFrame(loop);
 
-      ctx.clearRect(0, 0, 600, 600);
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-      ctx.beginPath();
-      ctx.arc(mouseX, mouseY, 20, 0, Math.PI * 2);
-      ctx.closePath();
-      ctx.fill();
+      for (let v = 0; v < height; v++) {
+        for (let u = 0; u < width; u++) {
+          const thisSpace = emptyBoardRef[v][u];
+          if (thisSpace !== 2) {
+            ctx.beginPath();
+            ctx.rect(spaceWidth * u + gridLeft, spaceHeight * v + gridTop, spaceWidth, spaceHeight);
+            ctx.closePath();
+            ctx.stroke();
+
+            if (this.game.puzzle[v][u] === 1
+              && !(holdingBall && u === tempMoveX && v === tempMoveY)) {
+              const thisBallSpace = ballSpaces[v][u];
+              ctx.beginPath();
+              ctx.arc(thisBallSpace.x, thisBallSpace.y, ballRadius, 0, Math.PI * 2);
+              ctx.closePath();
+              ctx.fill();
+            }
+          }
+        }
+      }
+
+      if (holdingBall) {
+        ctx.fillStyle = 'red';
+
+        ctx.beginPath();
+        ctx.arc(mouseX, mouseY, ballRadius, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = 'black';
+      }
 
       ctx.beginPath();
     };
 
     loop();
-  }, []);
+  };
 
-  return (
-    <div ref={canvasOuterRef} className='gameBoardCanvasOuter'>
-      <canvas ref={canvasRef} width='600' height='600'/>
-    </div>
-  );
-};
+  render() {
+    return (
+      <div ref={this.canvasOuterRef} className="gameBoardCanvasOuter">
+        <div className="ratio1x1">
+          <div className="ratioContainer">
+            <canvas ref={this.canvasRef} className="gameBoardCanvas" width="600" height="600"/>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
 
 module.exports = GameBoardUI;
