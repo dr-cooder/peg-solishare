@@ -91,20 +91,16 @@ const GamePage = (props) => {
   const [hintWaiting, setHintWaiting] = useState(false);
   const gameRef = createRef();
 
-  const somethingWentWrong = () => {
-    setHintWaiting(false);
-    setHintText('Something went wrong...');
-  }
-
   const getHint = async (code) => {
     if (hintWaiting) return null;
     setHintWaiting(true);
     setHintText('Awaiting hint...');
-    const { hint, unsolvable, alreadySolved } = await (
-      await fetch(`/hint?code=${code}`).catch(somethingWentWrong)
-      ).json().catch(somethingWentWrong);
+    const response = await fetch(`/hint?code=${code}`);
+    const { hint, unsolvable, alreadySolved, message } = await (response).json();
     setHintWaiting(false);
-    if (unsolvable) {
+    if (response.status !== 200) {
+      setHintText(message)
+    } else if (unsolvable) {
       setHintText('Not solvable from this point! Please undo.');
     } else if (alreadySolved) {
       setHintText('This puzzle has already been solved!');
@@ -113,7 +109,7 @@ const GamePage = (props) => {
         {'('}{hint.from.x + 1}, {hint.from.y + 1}{')'} <i className="fa fa-solid fa-arrow-right"></i> {'('}{hint.to.x + 1}, {hint.to.y + 1}{')'}
       </>);
     } else {
-      setHintText('Unexpected server response...');
+      setHintText('Unexpected server response.');
     }
   }
 
@@ -122,25 +118,27 @@ const GamePage = (props) => {
   }
 
   return (
-    <>
-      <div><GameBoardUI ref={gameRef} code={puzzleToCode(samples[props.puzzleName])} onMove={handleMove}/></div>
-      <div>The selected puzzle is: {props.puzzleName}</div>
-      <button id="hintButton" type="button" className="btn btn-warning" disabled={hintWaiting}
-        onClick={() => {
-          // Actually get the current code of the game board UI
-          getHint(gameRef.current.code());
-        }}><i className="fa-regular fa-lightbulb"></i> Hint</button>
-      <button id="undoButton" type="button" className="btn btn-secondary" disabled={hintWaiting}
-        onClick={() => {
-          gameRef.current.undo();
-        }}><i className="fa-solid fa-arrow-rotate-left"></i> Undo</button>
+    <div className="wrapper">
+      <h1>Disappearing Act 1</h1>
+      <h2>Created by: Niles</h2>
+      <GameBoardUI ref={gameRef} disabled={hintWaiting} code={puzzleToCode(samples[props.puzzleName])} onMove={handleMove}/>
+      <div className="buttonContainer">
+        <button id="hintButton" type="button" className="btn btn-warning btn-lg" disabled={hintWaiting}
+          onClick={() => {
+            getHint(gameRef.current.code());
+          }}><i className="fa-regular fa-lightbulb"></i> Hint</button>
+        <button id="undoButton" type="button" className="btn btn-secondary btn-lg" disabled={hintWaiting}
+          onClick={() => {
+            gameRef.current.undo();
+          }}><i className="fa-solid fa-arrow-rotate-left"></i> Undo</button>
+      </div>
       <h3>{hintText}</h3>
-    </>
+    </div>
   );
 }
 
 const init = () => {
-  ReactDOM.createRoot(document.getElementById('app')).render(<GamePage puzzleName="generated2"/>);
+  ReactDOM.createRoot(document.getElementById('app')).render(<GamePage puzzleName="disappearingAct1"/>);
 }
 
 window.onload = init;

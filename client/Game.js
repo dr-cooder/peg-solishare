@@ -185,6 +185,8 @@ class Game {
     return applicableSymmetries;
   }
 
+  // POTENTIALLY OBSOLETE - we should only ever really need to see one move ahead/behind,
+  // in which case only a single allValidMoves call should be necessary
   generation(moveDiffInitial = 0, binary = false) {
     const testGame = new Game(copyPuzzle(this.puzzle));
     const codes = new Set();

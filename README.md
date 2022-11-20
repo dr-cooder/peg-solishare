@@ -21,13 +21,11 @@ In Peg SoliShare, players can play Peg Solitaire puzzles created by other player
 - https://github.com/nodejs/node/issues/37320
 - https://stackoverflow.com/questions/2745432/best-way-to-detect-that-html5-canvas-is-not-supported
 - https://medium.com/@pdx.lucasm/canvas-with-react-js-32e133c05258
+- https://stackoverflow.com/questions/14391690/how-to-capture-no-file-for-fs-readfilesync
 - Bootstrap documentation
 ### External Components
 - Bootstrap
 ## To-Do
-- Canvas-based game UI for gameplay; drag and drop balls, interface with Game class (don't have any solving behavior client-side though)
-- Server-side functionality of taking a puzzle code and list of all previous moves, determining if it is solvable after those moves by referencing the Sacred Timeline (short-circuiting if the base puzzle is not), if so finding (one of) the next possible move(s), if not determining how many undos are needed to reach a solvable state (maybe not, maybe just say it's not solvable from here and tell them to undo)
-- ^^^ IDEALLY DO ABOVE BEFORE CHECKPOINT ^^^
 - Finish generating Sacred Timeline
-- Puzzle-creation UI similar to above only balls are either placed manually or generated from reverse-moves; after which it can be uploaded (after being verified as solvable of course)
+- Puzzle-creation UI similar to normal gameplay, only balls are either placed manually or generated from reverse-moves; after which it can be uploaded (after being verified as solvable of course)
 - After all of the above is done: online functionality ("Course World"); create and upload, or browse and play (rating system? keep track of high scores?) 

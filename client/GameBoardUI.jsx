@@ -8,6 +8,12 @@ const { emptyBoard, width, height } = require('./puzzle.js');
 class GameBoardUI extends Component {
   constructor(props) {
     super(props);
+
+    this.state = {
+      disabled: false,
+      holdingBall: false,
+    };
+
     this.canvasRef = createRef();
     this.canvasOuterRef = createRef();
     this.game = new Game(props.code);
@@ -20,6 +26,16 @@ class GameBoardUI extends Component {
       this.game.undo(reverse);
       this.props.onMove();
     }
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    if (props.disabled !== state.disabled) {
+      return {
+        disabled: props.disabled,
+        holdingBall: props.disabled ? false : state.holdingBall,
+      };
+    }
+    return null;
   }
 
   componentDidMount() {
@@ -86,16 +102,16 @@ class GameBoardUI extends Component {
       mouseGridY = Math.floor((mouseY - gridTop) / spaceHeight);
     }
 
-    let holdingBall = false;
     let tempMoveX = 0;
     let tempMoveY = 0;
     const pickUpBall = (e) => {
+      if (this.state.disabled) return;
       updateMouseGrid(e);
       if (this.game.puzzle[mouseGridY][mouseGridX] === 1) {
         const thisBallSpace = ballSpaces[mouseGridY][mouseGridX];
         if (thisBallSpace
           && distanceNoSqrt(mouseX, mouseY, thisBallSpace.x, thisBallSpace.y) < ballRadiusSquared) {
-          holdingBall = true;
+          this.setState({ holdingBall: true });
           tempMoveX = mouseGridX;
           tempMoveY = mouseGridY;
         }
@@ -103,8 +119,8 @@ class GameBoardUI extends Component {
     }
 
     const dropBall = (e) => {
-      if (!holdingBall) return;
-      holdingBall = false;
+      if (this.state.disabled || !this.state.holdingBall) return;
+      this.setState({ holdingBall: false });
       updateMouseGrid(e);
       const newMove = {
         from: {
@@ -148,7 +164,7 @@ class GameBoardUI extends Component {
             ctx.stroke();
 
             if (this.game.puzzle[v][u] === 1
-              && !(holdingBall && u === tempMoveX && v === tempMoveY)) {
+              && !(this.state.holdingBall && u === tempMoveX && v === tempMoveY)) {
               const thisBallSpace = ballSpaces[v][u];
               ctx.beginPath();
               ctx.arc(thisBallSpace.x, thisBallSpace.y, ballRadius, 0, Math.PI * 2);
@@ -159,7 +175,7 @@ class GameBoardUI extends Component {
         }
       }
 
-      if (holdingBall) {
+      if (this.state.holdingBall) {
         ctx.fillStyle = 'red';
 
         ctx.beginPath();
