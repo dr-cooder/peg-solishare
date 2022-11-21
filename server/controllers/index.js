@@ -36,18 +36,18 @@ const hint = (req, res) => {
       id: 'problemVerifyingSolvability',
     });
   }
-  let match = '';
+  let matchFound = false;
   let bitQueue = '';
   for (let i = 0; i < buf.byteLength; i++) {
     bitQueue += buf[i].toString(2).padStart(8, '0');
-    while (bitQueue.length >= spaces && !match) {
+    while (bitQueue.length >= spaces && !matchFound) {
       const solvableCode = bitQueue.slice(0, spaces);
       bitQueue = bitQueue.slice(spaces);
-      if (gameCode === solvableCode) match = solvableCode;
+      if (gameCode === solvableCode) matchFound = true;
     }
-    if (match) break;
+    if (matchFound) break;
   }
-  if (!match) {
+  if (!matchFound) {
     return res.status(200).json({ unsolvable: true });
   }
 
