@@ -1,6 +1,7 @@
 const fs = require('fs');
 const Game = require('../../client/Game.js');
 const { slotCount, isCode } = require('../../client/puzzle.js');
+const { byteToBits } = require('../../client/helpers.js');
 
 const homepage = (req, res) => res.render('homepage');
 
@@ -39,7 +40,7 @@ const hint = (req, res) => {
   let matchFound = false;
   let bitQueue = '';
   for (let i = 0; i < buf.byteLength; i++) {
-    bitQueue += buf[i].toString(2).padStart(8, '0');
+    bitQueue += byteToBits(buf[i]);
     while (bitQueue.length >= slotCount && !matchFound) {
       const solvableCode = bitQueue.slice(0, slotCount);
       bitQueue = bitQueue.slice(slotCount);
@@ -79,7 +80,7 @@ const hint = (req, res) => {
   }
   bitQueue = '';
   for (let i = 0; i < buf.byteLength; i++) {
-    bitQueue += buf[i].toString(2).padStart(8, '0');
+    bitQueue += byteToBits(buf[i]);
     while (bitQueue.length >= slotCount) {
       const solvableCode = bitQueue.slice(0, slotCount);
       bitQueue = bitQueue.slice(slotCount);
