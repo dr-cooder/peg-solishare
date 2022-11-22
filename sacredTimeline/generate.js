@@ -1,31 +1,8 @@
 const fs = require('fs');
 const Game = require('../client/Game.js');
 const { slotCount } = require('../client/puzzle.js');
-
-// https://github.com/nodejs/node/issues/37320
-class SuperSet {
-  constructor() {
-    this.sets = [new Set()];
-  }
-
-  add(v) {
-    if (this.sets[this.sets.length - 1].size === 16777000) this.sets.push(new Set());
-    if (!this.has(v)) this.sets[this.sets.length - 1].add(v);
-  }
-
-  has(v) {
-    for (let i = 0; i < this.sets.length; i++) {
-      if (this.sets[i].has(v)) return true;
-    }
-    return false;
-  }
-
-  forEach(callback) {
-    for (let i = 0; i < this.sets.length; i++) {
-      this.sets[i].forEach(callback);
-    }
-  }
-}
+const { byteToBits, byteFromBitRemainder } = require('../client/helpers.js');
+const SuperSet = require('./SuperSet.js');
 
 const ballCount = parseInt(process.argv[2], 10);
 if (Number.isNaN(ballCount)) process.exit(1);
@@ -71,7 +48,7 @@ if (ballCount === 1) {
     byteList.push(parseInt(bitQueue.slice(0, 8), 2));
     bitQueue = bitQueue.slice(8);
   }
-  byteList.push(parseInt(bitQueue.padEnd(8, '0'), 2));
+  if (bitQueue.length > 0) byteList.push(byteFromBitRemainder(bitQueue));
 
   saveFile(byteList, '1.bin');
 } else {
@@ -107,7 +84,7 @@ if (ballCount === 1) {
               process.stdout.write('Finding precursors...');
               for (let i = 0; i < buf.byteLength; i++) {
                 // process.stdout.write(buf[i].toString[i]);
-                bitQueue += buf[i].toString(2).padStart(8, '0');
+                bitQueue += byteToBits(buf[i]);
                 while (bitQueue.length >= slotCount) {
                   const binCode = bitQueue.slice(0, slotCount);
                   bitQueue = bitQueue.slice(slotCount);
@@ -116,7 +93,7 @@ if (ballCount === 1) {
                   for (let j = 0; j < parentMoves.length; j++) {
                     const parentMove = parentMoves[j];
                     game.makeMove(parentMove, true);
-                    solvables.add(game.code(true));
+                    solvables.add(game.code(36));
                     game.undo(true);
                   }
                 }
@@ -134,7 +111,7 @@ if (ballCount === 1) {
                   bitQueue = bitQueue.slice(8);
                 }
               });
-              byteList.push(parseInt(bitQueue.padEnd(8, '0'), 2));
+              if (bitQueue.length > 0) byteList.push(byteFromBitRemainder(bitQueue));
               doneHavingStartedAt(startTime, 1);
 
               saveFile(byteList, isPartial ? `partial/${ballCount}-${partActual + 1}.bin` : `${ballCount}.bin`);
