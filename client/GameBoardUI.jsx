@@ -21,7 +21,7 @@ class GameBoardUI extends Component {
 
     this.canvasRef = createRef();
     this.canvasOuterRef = createRef();
-    this.game = new Game(props.code);
+    this.game = new Game(props.basis);
 
     this.code = (base = defaultCodeBase) => this.game.code(base);
 
