@@ -1,6 +1,6 @@
 const fs = require('fs');
 const Game = require('../../client/Game.js');
-const { spaces, isHexCode } = require('../../client/puzzle.js');
+const { slotCount, isCode } = require('../../client/puzzle.js');
 
 const homepage = (req, res) => res.render('homepage');
 
@@ -8,14 +8,14 @@ const hint = (req, res) => {
   const { code } = req.query;
 
   // Confirm the input is valid first
-  if (!isHexCode(code)) {
+  if (!isCode(code)) {
     return res.status(400).json({
       message: `"${code}" is not a valid puzzle code.`,
       id: 'invalidCode',
     });
   }
   const game = new Game(code);
-  const gameCode = game.code(true);
+  const gameCode = game.code(2);
   const ballCount = game.countBalls();
 
   // Don't worry about puzzles that are already solved
@@ -40,9 +40,9 @@ const hint = (req, res) => {
   let bitQueue = '';
   for (let i = 0; i < buf.byteLength; i++) {
     bitQueue += buf[i].toString(2).padStart(8, '0');
-    while (bitQueue.length >= spaces && !matchFound) {
-      const solvableCode = bitQueue.slice(0, spaces);
-      bitQueue = bitQueue.slice(spaces);
+    while (bitQueue.length >= slotCount && !matchFound) {
+      const solvableCode = bitQueue.slice(0, slotCount);
+      bitQueue = bitQueue.slice(slotCount);
       if (gameCode === solvableCode) matchFound = true;
     }
     if (matchFound) break;
@@ -62,7 +62,7 @@ const hint = (req, res) => {
     testGame.makeMove(move);
     potentialHints.push({
       move,
-      code: testGame.code(true),
+      code: testGame.code(2),
     });
     testGame.undo();
   }
@@ -80,9 +80,9 @@ const hint = (req, res) => {
   bitQueue = '';
   for (let i = 0; i < buf.byteLength; i++) {
     bitQueue += buf[i].toString(2).padStart(8, '0');
-    while (bitQueue.length >= spaces) {
-      const solvableCode = bitQueue.slice(0, spaces);
-      bitQueue = bitQueue.slice(spaces);
+    while (bitQueue.length >= slotCount) {
+      const solvableCode = bitQueue.slice(0, slotCount);
+      bitQueue = bitQueue.slice(slotCount);
       for (let j = 0; j < potentialHintsCount; j++) {
         const potentialHint = potentialHints[j];
         if (potentialHint.code === solvableCode) {

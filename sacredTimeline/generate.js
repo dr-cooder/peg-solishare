@@ -1,6 +1,6 @@
 const fs = require('fs');
 const Game = require('../client/Game.js');
-const { spaces } = require('../client/puzzle.js');
+const { slotCount } = require('../client/puzzle.js');
 
 // https://github.com/nodejs/node/issues/37320
 class SuperSet {
@@ -64,7 +64,7 @@ const saveFile = (byteList, fName) => {
 };
 
 if (ballCount === 1) {
-  let bitQueue = Array(spaces).fill('1').join('0'.repeat(spaces));
+  let bitQueue = Array(slotCount).fill('1').join('0'.repeat(slotCount));
   const byteList = [];
 
   while (bitQueue.length >= 8) {
@@ -108,9 +108,9 @@ if (ballCount === 1) {
               for (let i = 0; i < buf.byteLength; i++) {
                 // process.stdout.write(buf[i].toString[i]);
                 bitQueue += buf[i].toString(2).padStart(8, '0');
-                while (bitQueue.length >= spaces) {
-                  const binCode = bitQueue.slice(0, spaces);
-                  bitQueue = bitQueue.slice(spaces);
+                while (bitQueue.length >= slotCount) {
+                  const binCode = bitQueue.slice(0, slotCount);
+                  bitQueue = bitQueue.slice(slotCount);
                   const game = new Game(binCode);
                   const parentMoves = game.allValidMoves(true);
                   for (let j = 0; j < parentMoves.length; j++) {

@@ -21,7 +21,7 @@ const emptyBoard = () => {
 };
 const width = 7;
 const height = 7;
-const spaces = 33;
+const slotCount = 33;
 
 const validMoveDeltas = [
   {
@@ -63,6 +63,12 @@ const validMoveDeltas = [
 ];
 const validMoveDeltaCount = 4;
 
+// Currently-disused feature - meant to cull the size of the Sacred Timeline by culling puzzles
+// that are the same but just rotated/flipped, and considering all 8 possible rotations/flips
+// when testing for matches. This has the side effect of determining rotations/flips being
+// computationally expensive both when generating the cache and checking solvability via
+// requests in real time.
+/*
 const maxX = width - 1;
 const maxY = width - 1;
 const symmetries = {
@@ -96,18 +102,29 @@ const symmetries = {
   }),
 };
 const symmetryKVPs = Object.entries(symmetries);
+*/
 
-const hexCodeLength = 9;
+// Create a cache of the expected max character lengths of codes of all possible bases namely,
+// binary codes should be of length 33 (there are 33 slots and 0/1 is analogous to empty/ball),
+// hexadecimal codes should be of length 9, and hexaTRIdecimal (Base36) codes should be of length 7.
+// One use for this information is padding out raw base-x-converted numbers with leading zeroes
+// such that all possible puzzles converted from analogous binary have the same minimal,
+// common length for each base
+const fullBoardCodeInt = parseInt('1'.repeat(slotCount), 2);
+const codeLength = (base) => fullBoardCodeInt.toString(base).length;
+const codeLengths = [];
+for (let i = 2; i <= 36; i++) codeLengths[i] = codeLength(i);
+const convertCodeBase = (code, from, to) => parseInt(code, from).toString(to).padStart(codeLengths[to], '0');
+const defaultCodeBase = 16;
 
+// These lengths can also be used to create a cache of RegExps which can be used to verify that
+// the passed-in code matches the format of the given code base
 // https://stackoverflow.com/questions/1779013/check-if-string-contains-only-digits
 // https://www.sitepoint.com/using-regular-expressions-to-check-string-length/
 // https://www.webtips.dev/webtips/javascript/javascript-create-regex-from-string-variable
-const hexCodePattern = new RegExp(`^[0-9a-f]{${hexCodeLength}}$`);
-// https://stackoverflow.com/questions/37199019/method-set-prototype-add-called-on-incompatible-receiver-undefined
-const isHexCode = hexCodePattern.test.bind(hexCodePattern);
-
-const binCodePattern = new RegExp(`^[01]{${spaces}}$`);
-const isBinCode = binCodePattern.test.bind(binCodePattern);
+const codeRegExps = [];
+for (let i = 2; i <= 36; i++) codeRegExps[i] = new RegExp(`^[${'0123456789abcdefghijklmnopqrstuvwxyz'.slice(0, i)}]{${codeLengths[i]}}$`);
+const isCode = (code, base = defaultCodeBase) => codeRegExps[base].test(code);
 
 const isPuzzle = (obj) => {
   if (!obj) return false;
@@ -151,10 +168,9 @@ const copyPuzzle = (puzzle) => {
 };
 
 // DOES NOT VALIDATE CODE BY ITSELF FOR PERFORMANCE REASONS
-const codeToPuzzle = (code, binary) => {
-  // If there are no leading zeroes, the balls will be offset
-  // Also if the code is already in binary obviously no conversion is warranted
-  const codeBin = binary ? code : parseInt(code, 16).toString(2).padStart(spaces, '0');
+const codeToPuzzle = (code, base = defaultCodeBase) => {
+  // If the code is already in binary obviously no conversion is warranted
+  const codeBin = (base === 2) ? code : convertCodeBase(code, base, 2);
   const puzzle = emptyBoard();
 
   // "Print" balls left to right, top to bottom
@@ -162,7 +178,7 @@ const codeToPuzzle = (code, binary) => {
   for (let v = 0; v < height; v++) {
     const row = puzzle[v];
     for (let u = 0; u < width; u++) {
-      // Skip over non-spaces
+      // Skip over non-slotCount
       if (row[u] !== 2) {
         row[u] = codeBin[i];
         i++;
@@ -174,7 +190,7 @@ const codeToPuzzle = (code, binary) => {
 };
 
 // DOES NOT VALIDATE GRID BY ITSELF FOR PERFORMANCE REASONS
-const puzzleToCode = (puzzle, binary) => {
+const puzzleToCode = (puzzle, base = defaultCodeBase) => {
   let codeBin = '';
 
   // "Read" balls left to right, top to bottom
@@ -182,30 +198,30 @@ const puzzleToCode = (puzzle, binary) => {
     const row = puzzle[v];
     for (let u = 0; u < width; u++) {
       const space = row[u];
-      // Skip over non-spaces
+      // Skip over non-slotCount
       if (space !== 2) {
         codeBin += space;
       }
     }
   }
 
-  if (binary) return codeBin;
-  return parseInt(codeBin, 2).toString(16).padStart(hexCodeLength, '0');
+  return (base === 2) ? codeBin : convertCodeBase(codeBin, 2, base);
 };
 
 module.exports = {
   emptyBoard,
   width,
   height,
-  spaces,
+  slotCount,
   validMoveDeltas,
   validMoveDeltaCount,
-  symmetries,
-  symmetryKVPs,
-  isHexCode,
-  isBinCode,
+  // symmetries,
+  // symmetryKVPs,
+  isCode,
   isPuzzle,
   copyPuzzle,
   codeToPuzzle,
   puzzleToCode,
+  convertCodeBase,
+  defaultCodeBase,
 };

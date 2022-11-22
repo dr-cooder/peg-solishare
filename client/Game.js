@@ -5,13 +5,13 @@ const {
   validMoveDeltas,
   validMoveDeltaCount,
   // symmetries,
-  symmetryKVPs,
-  isHexCode,
-  isBinCode,
+  // symmetryKVPs,
+  isCode,
   isPuzzle,
-  copyPuzzle,
+  // copyPuzzle,
   codeToPuzzle,
   puzzleToCode,
+  defaultCodeBase,
 } = require('./puzzle.js');
 
 class Game {
@@ -21,10 +21,10 @@ class Game {
     } else if (isPuzzle(basis)) {
       // It is assumed that the passed-in puzzle is not an undesired shallow copy
       this.puzzle = basis;
-    } else if (isHexCode(basis)) {
+    } else if (isCode(basis)) {
       this.puzzle = codeToPuzzle(basis);
-    } else if (isBinCode(basis)) {
-      this.puzzle = codeToPuzzle(basis, true);
+    } else if (isCode(basis, 2)) {
+      this.puzzle = codeToPuzzle(basis, 2);
     } else {
       this.puzzle = emptyBoard();
     }
@@ -124,7 +124,8 @@ class Game {
     return validMoves;
   }
 
-  // If move is valid, applies the move to the puzzle and returns true. Otherwise returns false.
+  // If move is valid (this needs to be checked to determine the ball to be jumped over),
+  // applies the move to the puzzle and returns true. Otherwise returns false.
   makeMove(move, reverse, dontAddToHistory) {
     const moveValidation = this.validateMove(move, reverse);
     if (!moveValidation) return false;
@@ -160,6 +161,8 @@ class Game {
     return ballCount;
   }
 
+  // Once again, disused until further notice due to inviability
+  /*
   getSymmetries() {
     const applicableSymmetries = [];
 
@@ -184,17 +187,19 @@ class Game {
 
     return applicableSymmetries;
   }
+  */
 
-  // POTENTIALLY OBSOLETE - we should only ever really need to see one move ahead/behind,
+  // LIKELY OBSOLETE - we should only ever really need to see one move ahead/behind,
   // in which case only a single allValidMoves call should be necessary
-  generation(moveDiffInitial = 0, binary = false) {
+  /*
+  generation(moveDiffInitial = 0, base = defaultCodeBase) {
     const testGame = new Game(copyPuzzle(this.puzzle));
     const codes = new Set();
     const reverse = moveDiffInitial < 0;
 
     const generationRecursive = (moveDiff) => {
       if (moveDiff === 0) {
-        codes.add(testGame.code(binary));
+        codes.add(testGame.code(base));
       } else {
         const nextMoves = testGame.allValidMoves(reverse);
         for (let i = 0; i < nextMoves.length; i++) {
@@ -209,12 +214,14 @@ class Game {
     generationRecursive(moveDiffInitial);
     return codes;
   }
+  */
 
   // THIS IS AN OBSOLETE FUNCTION - solving, giving hints, and verifying solvability
   // is to be done server-side via the Sacred Timeline
-  // DO NOT CALL WITHOUT VERIFYING THE PUZZLE IS SOLVABLE FIRST
+  // (Earlier comment:) DO NOT CALL WITHOUT VERIFYING THE PUZZLE IS SOLVABLE FIRST
   // If solve is called on an unsolvable puzzle, this will be found the "hard way" resource-wise;
   // Every possible set of moves will be made only for the function to return null
+  /*
   solve() {
     const testGame = new Game(copyPuzzle(this.puzzle));
     let ballCount = testGame.countBalls();
@@ -250,14 +257,15 @@ class Game {
 
     return solveRecursive();
   }
+  */
 
   // Just for testing purposes
   puzzleToString() {
     return this.puzzle.map((r) => Array.from(r).map((c) => ['.', 'O', ' '][c]).join(' ')).join('\n');
   }
 
-  code(binary) {
-    return puzzleToCode(this.puzzle, binary);
+  code(base = defaultCodeBase) {
+    return puzzleToCode(this.puzzle, base);
   }
 }
 

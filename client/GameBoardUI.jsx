@@ -3,7 +3,12 @@ const {
 } = React;
 const { distanceNoSqrt } = require('./helpers.js');
 const Game = require('./Game.js');
-const { emptyBoard, width, height } = require('./puzzle.js');
+const {
+  emptyBoard,
+  width,
+  height,
+  defaultCodeBase,
+} = require('./puzzle.js');
 
 class GameBoardUI extends Component {
   constructor(props) {
@@ -18,14 +23,12 @@ class GameBoardUI extends Component {
     this.canvasOuterRef = createRef();
     this.game = new Game(props.code);
 
-    this.code = (binary) => {
-      return this.game.code(binary);
-    }
-  
+    this.code = (base = defaultCodeBase) => this.game.code(base);
+
     this.undo = (reverse) => {
       this.game.undo(reverse);
       this.props.onMove();
-    }
+    };
   }
 
   static getDerivedStateFromProps(props, state) {
@@ -56,7 +59,7 @@ class GameBoardUI extends Component {
     const ballRadius = 20;
     const ballRadiusSquared = ballRadius * ballRadius;
 
-    const ballSpaces = [];
+    const slots = [];
     for (let v = 0; v < height; v++) {
       const thisRow = [];
       const thisRowY = spaceHeight * (v + 0.5) + gridTop;
@@ -64,11 +67,11 @@ class GameBoardUI extends Component {
         if (emptyBoardRef[v][u] !== 2) {
           thisRow[u] = {
             x: spaceWidth * (u + 0.5) + gridLeft,
-            y: thisRowY
+            y: thisRowY,
           };
         }
       }
-      ballSpaces[v] = thisRow;
+      slots[v] = thisRow;
     }
 
     let mouseX = canvasWidth / 2;
@@ -100,7 +103,7 @@ class GameBoardUI extends Component {
       updateMouse(e);
       mouseGridX = Math.floor((mouseX - gridLeft) / spaceWidth);
       mouseGridY = Math.floor((mouseY - gridTop) / spaceHeight);
-    }
+    };
 
     let tempMoveX = 0;
     let tempMoveY = 0;
@@ -108,15 +111,15 @@ class GameBoardUI extends Component {
       if (this.state.disabled) return;
       updateMouseGrid(e);
       if (this.game.puzzle[mouseGridY][mouseGridX] === 1) {
-        const thisBallSpace = ballSpaces[mouseGridY][mouseGridX];
-        if (thisBallSpace
-          && distanceNoSqrt(mouseX, mouseY, thisBallSpace.x, thisBallSpace.y) < ballRadiusSquared) {
+        const thisSlot = slots[mouseGridY][mouseGridX];
+        if (thisSlot
+          && distanceNoSqrt(mouseX, mouseY, thisSlot.x, thisSlot.y) < ballRadiusSquared) {
           this.setState({ holdingBall: true });
           tempMoveX = mouseGridX;
           tempMoveY = mouseGridY;
         }
       }
-    }
+    };
 
     const dropBall = (e) => {
       if (this.state.disabled || !this.state.holdingBall) return;
@@ -130,10 +133,10 @@ class GameBoardUI extends Component {
         to: {
           x: mouseGridX,
           y: mouseGridY,
-        }
-      }
+        },
+      };
       if (this.game.makeMove(newMove)) this.props.onMove();
-    }
+    };
 
     canvasOuterEl.onmousedown = pickUpBall;
     canvasOuterEl.onmousemove = updateMouse;
@@ -156,8 +159,8 @@ class GameBoardUI extends Component {
 
       for (let v = 0; v < height; v++) {
         for (let u = 0; u < width; u++) {
-          const thisSpace = emptyBoardRef[v][u];
-          if (thisSpace !== 2) {
+          const thisSlot = slots[v][u];
+          if (thisSlot) {
             ctx.beginPath();
             ctx.rect(spaceWidth * u + gridLeft, spaceHeight * v + gridTop, spaceWidth, spaceHeight);
             ctx.closePath();
@@ -165,9 +168,8 @@ class GameBoardUI extends Component {
 
             if (this.game.puzzle[v][u] === 1
               && !(this.state.holdingBall && u === tempMoveX && v === tempMoveY)) {
-              const thisBallSpace = ballSpaces[v][u];
               ctx.beginPath();
-              ctx.arc(thisBallSpace.x, thisBallSpace.y, ballRadius, 0, Math.PI * 2);
+              ctx.arc(thisSlot.x, thisSlot.y, ballRadius, 0, Math.PI * 2);
               ctx.closePath();
               ctx.fill();
             }
@@ -190,7 +192,7 @@ class GameBoardUI extends Component {
     };
 
     loop();
-  };
+  }
 
   render() {
     return (

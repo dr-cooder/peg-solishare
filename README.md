@@ -15,7 +15,6 @@ In Peg SoliShare, players can play Peg Solitaire puzzles created by other player
 - https://stackoverflow.com/questions/1779013/check-if-string-contains-only-digits
 - https://www.sitepoint.com/using-regular-expressions-to-check-string-length/
 - https://www.webtips.dev/webtips/javascript/javascript-create-regex-from-string-variable
-- https://stackoverflow.com/questions/37199019/method-set-prototype-add-called-on-incompatible-receiver-undefined
 - https://youtu.be/R4vV4szAoDY
 - https://www.geeksforgeeks.org/node-js-fs-read-method/
 - https://github.com/nodejs/node/issues/37320
