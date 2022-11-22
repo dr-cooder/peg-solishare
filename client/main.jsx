@@ -120,7 +120,7 @@ const GamePage = (props) => {
     <div className="wrapper">
       <h1>Disappearing Act 1</h1>
       <h2>Created by: Niles</h2>
-      <GameBoardUI ref={gameRef} disabled={hintWaiting} code={...samples[props.puzzleName]} onMove={handleMove}/>
+      <GameBoardUI ref={gameRef} disabled={hintWaiting} basis={samples[props.puzzleName]} onMove={handleMove}/>
       <div className="buttonContainer">
         <button id="hintButton" type="button" className="btn btn-warning btn-lg" disabled={hintWaiting}
           onClick={() => {
