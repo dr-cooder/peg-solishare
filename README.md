@@ -21,6 +21,7 @@ In Peg SoliShare, players can play Peg Solitaire puzzles created by other player
 - https://stackoverflow.com/questions/2745432/best-way-to-detect-that-html5-canvas-is-not-supported
 - https://medium.com/@pdx.lucasm/canvas-with-react-js-32e133c05258
 - https://stackoverflow.com/questions/14391690/how-to-capture-no-file-for-fs-readfilesync
+- https://hwpi.harvard.edu/assetslibrary/host-css-or-js-file-google-drive
 - Bootstrap documentation
 ### External Components
 - Bootstrap

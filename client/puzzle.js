@@ -63,46 +63,91 @@ const validMoveDeltas = [
 ];
 const validMoveDeltaCount = 4;
 
-// Currently-disused feature - meant to cull the size of the Sacred Timeline by culling puzzles
-// that are the same but just rotated/flipped, and considering all 8 possible rotations/flips
-// when testing for matches. This has the side effect of determining rotations/flips being
-// computationally expensive both when generating the cache and checking solvability via
-// requests in real time.
-/*
-const maxX = width - 1;
-const maxY = width - 1;
-const symmetries = {
-  flipHoriz: (coords) => ({
-    x: maxX - coords.x,
-    y: coords.y,
-  }),
-  flipVert: (coords) => ({
-    x: coords.x,
-    y: maxY - coords.y,
-  }),
-  flipDiagPos: (coords) => ({
-    x: coords.y,
-    y: coords.x,
-  }),
-  flipDiagNeg: (coords) => ({
-    x: maxY - coords.y,
-    y: maxX - coords.x,
-  }),
-  rotate180: (coords) => ({
-    x: maxX - coords.x,
-    y: maxY - coords.y,
-  }),
-  rotate90counterClock: (coords) => ({
-    x: coords.y,
-    y: maxX - coords.x,
-  }),
-  rotate90clock: (coords) => ({
-    x: maxY - coords.y,
-    y: coords.x,
-  }),
+// Meant to cull the size of the Sacred Timeline by culling puzzles that are the same but just
+// rotated/flipped, and considering all 8 possible rotations/flips when testing for matches.
+const isometries = [
+  // No need to include identity
+  [ // Flip horizontally
+    2, 1, 0,
+    5, 4, 3,
+    12, 11, 10, 9, 8, 7, 6,
+    19, 18, 17, 16, 15, 14, 13,
+    26, 25, 24, 23, 22, 21, 20,
+    29, 28, 27,
+    32, 31, 30,
+  ],
+  [ // Flip vertically
+    30, 31, 32,
+    27, 28, 29,
+    20, 21, 22, 23, 24, 25, 26,
+    13, 14, 15, 16, 17, 18, 19,
+    6, 7, 8, 9, 10, 11, 12,
+    3, 4, 5,
+    0, 1, 2,
+  ],
+  [ // Rotate 180 degrees (flip horiz+vert)
+    32, 31, 30,
+    29, 28, 27,
+    26, 25, 24, 23, 22, 21, 20,
+    19, 18, 17, 16, 15, 14, 13,
+    12, 11, 10, 9, 8, 7, 6,
+    5, 4, 3,
+    2, 1, 0,
+  ],
+  [ // Flip diagonal "\"
+    6, 13, 20,
+    7, 14, 21,
+    0, 3, 8, 15, 22, 27, 30,
+    1, 4, 9, 16, 23, 28, 31,
+    2, 5, 10, 17, 24, 29, 32,
+    11, 18, 25,
+    12, 19, 26,
+  ],
+  [ // Flip diagonal "/"
+    26, 19, 12,
+    25, 18, 11,
+    32, 29, 24, 17, 10, 5, 2,
+    31, 28, 23, 16, 9, 4, 1,
+    30, 27, 22, 15, 8, 3, 0,
+    21, 14, 7,
+    20, 13, 6,
+  ],
+  [ // Rotate 90 degrees counterclockwise
+    12, 19, 26,
+    11, 18, 25,
+    2, 5, 10, 17, 24, 29, 32,
+    1, 4, 9, 16, 23, 28, 31,
+    0, 3, 8, 15, 22, 27, 30,
+    7, 14, 21,
+    6, 13, 20,
+  ],
+  [ // Rotate 90 degrees clockwise
+    20, 13, 6,
+    21, 14, 7,
+    30, 27, 22, 15, 8, 3, 0,
+    31, 28, 23, 16, 9, 4, 1,
+    32, 29, 24, 17, 10, 5, 2,
+    25, 18, 11,
+    26, 19, 12,
+  ],
+];
+const isometryCount = 7;
+const transform = (binCode, isometryNum) => {
+  const isometry = isometries[isometryNum];
+  let transformed = '';
+  for (let i = 0; i < slotCount; i++) {
+    transformed += binCode.charAt(isometry[i]);
+  }
+  return transformed;
 };
-const symmetryKVPs = Object.entries(symmetries);
-*/
+const codeImages = (binCode) => {
+  // We want to keep the codes in binary and there are going to be at most 8,
+  // so we don't want to go overkill with a PuzzleSet
+  const gameCodeImageSet = new Set();
+  gameCodeImageSet.add(binCode);
+  for (let i = 0; i < isometryCount; i++) gameCodeImageSet.add(transform(binCode, i));
+  return Array.from(gameCodeImageSet);
+};
 
 // Create a cache of the expected max character lengths of codes of all possible bases namely,
 // binary codes should be of length 33 (there are 33 slots and 0/1 is analogous to empty/ball),
@@ -224,4 +269,7 @@ module.exports = {
   puzzleToCode,
   convertCodeBase,
   defaultCodeBase,
+  transform,
+  isometryCount,
+  codeImages,
 };

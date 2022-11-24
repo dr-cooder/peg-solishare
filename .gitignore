@@ -57,5 +57,6 @@ typings/
 # dotenv environment variables file
 .env
 
-# Solvable puzzle cache partials
+# Solvable puzzle cache (too big for Heroku - to be hosted elsewhere)
 sacredTimeline/partial
+# sacredTimeline/[0-9]*.bin

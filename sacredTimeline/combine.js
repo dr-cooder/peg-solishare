@@ -1,13 +1,13 @@
 const fs = require('fs');
 const { slotCount, convertCodeBase } = require('../client/puzzle.js');
 const { byteToBits, byteFromBitRemainder } = require('../client/helpers.js');
-const SuperSet = require('./SuperSet.js');
+const PuzzleSet = require('./PuzzleSet.js');
 
 const ballCountName = process.argv[2];
 const parts = fs.readdirSync('./partial/').filter((e) => e.slice(0, ballCountName.length + 1) === `${ballCountName}-`);
 const partsCount = parts.length;
 
-const solvablesMerged = new SuperSet(); // This will get very big!
+const solvablesMerged = new PuzzleSet(); // This will get very big!
 let buf;
 let bitQueue;
 
@@ -18,7 +18,7 @@ for (let i = 0; i < partsCount; i++) {
   for (let j = 0; j < buf.byteLength; j++) {
     bitQueue += byteToBits(buf[j]);
     while (bitQueue.length >= slotCount) {
-      solvablesMerged.add(convertCodeBase(bitQueue.slice(0, slotCount), 2, 36));
+      solvablesMerged.add(bitQueue.slice(0, slotCount));
       bitQueue = bitQueue.slice(slotCount);
     }
   }
