@@ -1,8 +1,8 @@
 const fs = require('fs');
 const Game = require('../client/Game.js');
-const { slotCount } = require('../client/puzzle.js');
+const { slotCount, convertCodeBase } = require('../client/puzzle.js');
 const { byteToBits, byteFromBitRemainder } = require('../client/helpers.js');
-const SuperSet = require('./SuperSet.js');
+const PuzzleSet = require('./PuzzleSet.js');
 
 const ballCount = parseInt(process.argv[2], 10);
 if (Number.isNaN(ballCount)) process.exit(1);
@@ -19,38 +19,24 @@ const doneHavingStartedAt = (startTime, padding) => {
   process.stdout.write(`${' '.repeat(padding)}Done after ${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}.${milis.toString().padStart(3, '0')}\n`);
 };
 
-const saveFile = (byteList, fName) => {
-  const startTime = Date.now();
-  process.stdout.write('Making buffer from byte list...');
-  const buf = Buffer.from(byteList);
-  doneHavingStartedAt(startTime, 4);
-  fs.open(fName, 'w', (errOpen, fd) => {
-    if (errOpen) {
-      process.stdout.write(`\nError opening ${fName}: ${errOpen.message}`);
-    } else {
-      fs.write(fd, buf, 0, buf.byteLength, 0, (errWrite) => {
-        if (errWrite) {
-          process.stdout.write(`\nError writing buffer to ${fName}: ${errWrite.message}`);
-          fs.close(fd);
-        } else {
-          fs.close(fd, () => process.stdout.write('All done!'));
-        }
-      });
+if (ballCount === 1) {
+  // Make what the list of all one-ball win states would be under the "no symmetries" rule
+  const winStates = new PuzzleSet();
+  for (let i = 0; i < slotCount; i++) winStates.add(`${'0'.repeat(i)}1${'0'.repeat(slotCount - 1 - i)}`);
+
+  // let bitQueue = Array(slotCount).fill('1').join('0'.repeat(slotCount));
+  const byteList = [];
+  let bitQueue = '';
+  winStates.forEach((winState) => {
+    bitQueue += convertCodeBase(winState, 36, 2);
+    while (bitQueue.length >= 8) {
+      byteList.push(parseInt(bitQueue.slice(0, 8), 2));
+      bitQueue = bitQueue.slice(8);
     }
   });
-};
-
-if (ballCount === 1) {
-  let bitQueue = Array(slotCount).fill('1').join('0'.repeat(slotCount));
-  const byteList = [];
-
-  while (bitQueue.length >= 8) {
-    byteList.push(parseInt(bitQueue.slice(0, 8), 2));
-    bitQueue = bitQueue.slice(8);
-  }
   if (bitQueue.length > 0) byteList.push(byteFromBitRemainder(bitQueue));
 
-  saveFile(byteList, '1.bin');
+  fs.writeFileSync('1.bin', Buffer.from(byteList));
 } else {
   const fName = `${ballCount - 1}.bin`;
   // https://www.geeksforgeeks.org/node-js-fs-read-method/
@@ -78,7 +64,7 @@ if (ballCount === 1) {
               process.stdout.write(`\nError reading ${fName}: ${errRead.message}`);
             } else {
               let bitQueue = '';
-              const solvables = new SuperSet(); // This will get very big!
+              const solvables = new PuzzleSet(); // This will get very big!
 
               let startTime = Date.now();
               process.stdout.write('Finding precursors...');
@@ -93,28 +79,30 @@ if (ballCount === 1) {
                   for (let j = 0; j < parentMoves.length; j++) {
                     const parentMove = parentMoves[j];
                     game.makeMove(parentMove, true);
-                    solvables.add(game.code(36));
+                    solvables.add(game.code(2));
                     game.undo(true);
                   }
                 }
               }
-              doneHavingStartedAt(startTime, 9);
+              doneHavingStartedAt(startTime, 14);
 
               startTime = Date.now();
               process.stdout.write('Writing precursors to byte list...');
               bitQueue = '';
-              const byteList = [];
+              const byteList = new Uint8Array(Math.ceil((solvables.size() * 33) / 8));
+              let i = 0;
               solvables.forEach((solvable) => {
-                bitQueue += solvable;
+                bitQueue += convertCodeBase(solvable, 36, 2);
                 while (bitQueue.length >= 8) {
-                  byteList.push(parseInt(bitQueue.slice(0, 8), 2));
+                  byteList[i] = parseInt(bitQueue.slice(0, 8), 2);
+                  i++;
                   bitQueue = bitQueue.slice(8);
                 }
               });
-              if (bitQueue.length > 0) byteList.push(byteFromBitRemainder(bitQueue));
+              if (bitQueue.length > 0) byteList[i] = byteFromBitRemainder(bitQueue);
               doneHavingStartedAt(startTime, 1);
 
-              saveFile(byteList, isPartial ? `partial/${ballCount}-${partActual + 1}.bin` : `${ballCount}.bin`);
+              fs.writeFileSync(isPartial ? `partial/${ballCount}-${partActual + 1}.bin` : `${ballCount}.bin`, Buffer.from(byteList));
             }
           });
         }
