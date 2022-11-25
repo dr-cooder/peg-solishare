@@ -42,7 +42,7 @@ const hint = (req, res) => {
   } catch (err) {
     return res.status(500).json({
       message: 'There was a problem accessing hint data.',
-      id: 'problemVerifyingSolvability',
+      id: 'problemAccessingHintData',
     });
   }
   let matchFound = false;
@@ -91,7 +91,7 @@ const hint = (req, res) => {
   } catch (err) {
     return res.status(500).json({
       message: 'There was a problem accessing hint data.',
-      id: 'problemGeneratingHint',
+      id: 'problemAccessingHintData',
     });
   }
   bitQueue = '';

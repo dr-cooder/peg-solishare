@@ -59,4 +59,4 @@ typings/
 
 # Solvable puzzle cache (too big for Heroku - to be hosted elsewhere)
 sacredTimeline/partial
-# sacredTimeline/[0-9]*.bin
+sacredTimeline/[0-9]*.bin
