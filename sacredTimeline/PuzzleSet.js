@@ -5,7 +5,8 @@ const imageCount = isometryCount + 1;
 
 // https://github.com/nodejs/node/issues/37320
 class PuzzleSet {
-  constructor() {
+  constructor(mergeSymmetries = true) {
+    this.mergeSymmetries = mergeSymmetries;
     this.sets = [new Set()];
   }
 
@@ -17,17 +18,23 @@ class PuzzleSet {
   }
 
   has(v) {
-    const images = [];
-    images.push(convertCodeBase(v, 2, 36));
-    for (let i = 0; i < isometryCount; i++) {
-      images.push(convertCodeBase(transform(v, i), 2, 36));
-    }
-
-    for (let i = 0; i < imageCount; i++) {
-      const image = images[i];
-      for (let j = 0; j < this.sets.length; j++) {
-        if (this.sets[j].has(image)) return true;
+    if (this.mergeSymmetries) {
+      const images = [];
+      images.push(convertCodeBase(v, 2, 36));
+      for (let i = 0; i < isometryCount; i++) {
+        images.push(convertCodeBase(transform(v, i), 2, 36));
       }
+
+      for (let i = 0; i < imageCount; i++) {
+        const image = images[i];
+        for (let j = 0; j < this.sets.length; j++) {
+          if (this.sets[j].has(image)) return true;
+        }
+      }
+      return false;
+    }
+    for (let i = 0; i < this.sets.length; i++) {
+      if (this.sets[i].has(v)) return true;
     }
     return false;
   }

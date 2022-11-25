@@ -16,16 +16,17 @@ In Peg SoliShare, players can play Peg Solitaire puzzles created by other player
 - https://www.sitepoint.com/using-regular-expressions-to-check-string-length/
 - https://www.webtips.dev/webtips/javascript/javascript-create-regex-from-string-variable
 - https://youtu.be/R4vV4szAoDY
-- https://www.geeksforgeeks.org/node-js-fs-read-method/
 - https://github.com/nodejs/node/issues/37320
 - https://stackoverflow.com/questions/2745432/best-way-to-detect-that-html5-canvas-is-not-supported
 - https://medium.com/@pdx.lucasm/canvas-with-react-js-32e133c05258
 - https://stackoverflow.com/questions/14391690/how-to-capture-no-file-for-fs-readfilesync
 - https://hwpi.harvard.edu/assetslibrary/host-css-or-js-file-google-drive
+- https://blog.bitsrc.io/coloring-your-terminal-using-nodejs-eb647d4af2a2
+- https://stackoverflow.com/questions/17309749/node-js-console-log-is-it-possible-to-update-a-line-rather-than-create-a-new-l
 - Bootstrap documentation
 ### External Components
 - Bootstrap
 ## To-Do
-- Finish generating Sacred Timeline
+- Finish generating Sacred Timeline / consider abstaining from symmetry rule; data may be smaller but match finding in real time is slower and more intensive
 - Puzzle-creation UI similar to normal gameplay, only balls are either placed manually or generated from reverse-moves; after which it can be uploaded (after being verified as solvable of course)
 - After all of the above is done: online functionality ("Course World"); create and upload, or browse and play (rating system? keep track of high scores?) 
