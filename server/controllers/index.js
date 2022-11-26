@@ -5,9 +5,28 @@ const {
   isCode,
   codeImages,
 } = require('../../client/puzzle.js');
-const { byteToBits } = require('../../client/helpers.js');
+const { byteToBits, formatTime } = require('../../client/helpers.js');
 
 const homepage = (req, res) => res.render('homepage');
+
+const testHerokuDownloadSpeed = async (req, res) => {
+  const startTime = Date.now();
+  const response = await fetch('https://drive.google.com/uc?export=view&id=1pcpi1B58ualrN1Lf9WWwKRML3OjSt7wy');
+  if (!response) {
+    return res.status(500).json({
+      message: 'Problem using fetch',
+    });
+  }
+  const buf = await response.arrayBuffer();
+  if (!buf) {
+    return res.status(500).json({
+      message: 'Problem getting buffer',
+    });
+  }
+  return res.status(200).json({
+    message: `Downloaded ${buf.byteLength} bytes inn ${formatTime(Date.now() - startTime)}`,
+  });
+};
 
 const hint = (req, res) => {
   // TO-DO: Create a stateful hint cache (of a fixed "circular" length?)
@@ -122,4 +141,5 @@ const hint = (req, res) => {
 module.exports = {
   homepage,
   hint,
+  testHerokuDownloadSpeed,
 };
