@@ -88,6 +88,7 @@ const samples = {
 const GamePage = (props) => {
   const [hintText, setHintText] = useState();
   const [hintWaiting, setHintWaiting] = useState(false);
+  const [speedTestMessage, setSpeedTestMessage] = useState();
   const gameRef = createRef();
 
   const getHint = async (code) => {
@@ -95,7 +96,7 @@ const GamePage = (props) => {
     setHintWaiting(true);
     setHintText('Awaiting hint...');
     const response = await fetch(`/hint?code=${code}`);
-    const { hint, unsolvable, alreadySolved, message } = await (response).json();
+    const { hint, unsolvable, alreadySolved, message } = await response.json();
     setHintWaiting(false);
     if (response.status !== 200) {
       setHintText(message)
@@ -116,6 +117,13 @@ const GamePage = (props) => {
     setHintText('');
   }
 
+  const speedTest = async () => {
+    setSpeedTestMessage('Waiting...');
+    const response = await fetch(`/speedTest`);
+    const { message } = await response.json();
+    setSpeedTestMessage(message);
+  }
+
   return (
     <div className="wrapper">
       <h1>Disappearing Act 3</h1>
@@ -132,6 +140,8 @@ const GamePage = (props) => {
           }}><i className="fa-solid fa-arrow-rotate-left"></i> Undo</button>
       </div>
       <h3>{hintText}</h3>
+      <div><a href="#" className="link-primary" onClick={speedTest}>Test Heroku speed</a></div>
+      <div>{speedTestMessage}</div>
     </div>
   );
 }

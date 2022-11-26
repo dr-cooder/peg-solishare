@@ -5,7 +5,7 @@ const imageCount = isometryCount + 1;
 
 // https://github.com/nodejs/node/issues/37320
 class PuzzleSet {
-  constructor(mergeSymmetries = true) {
+  constructor(mergeSymmetries) {
     this.mergeSymmetries = mergeSymmetries;
     this.sets = [new Set()];
   }
