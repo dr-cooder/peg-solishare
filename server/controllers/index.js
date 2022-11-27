@@ -3,30 +3,11 @@ const Game = require('../../client/Game.js');
 const {
   slotCount,
   isCode,
-  codeImages,
+  // midCharIndex,
 } = require('../../client/puzzle.js');
-const { byteToBits, formatTime } = require('../../client/helpers.js');
+const { byteToBits } = require('../../client/helpers.js');
 
 const homepage = (req, res) => res.render('homepage');
-
-const testHerokuDownloadSpeed = async (req, res) => {
-  const startTime = Date.now();
-  const response = await fetch('https://drive.google.com/uc?export=view&id=1pcpi1B58ualrN1Lf9WWwKRML3OjSt7wy');
-  if (!response) {
-    return res.status(500).json({
-      message: 'Problem using fetch',
-    });
-  }
-  const buf = await response.arrayBuffer();
-  if (!buf) {
-    return res.status(500).json({
-      message: 'Problem getting buffer',
-    });
-  }
-  return res.status(200).json({
-    message: `Downloaded ${buf.byteLength} bytes inn ${formatTime(Date.now() - startTime)}`,
-  });
-};
 
 const hint = (req, res) => {
   // TO-DO: Create a stateful hint cache (of a fixed "circular" length?)
@@ -41,19 +22,26 @@ const hint = (req, res) => {
     });
   }
   const game = new Game(code);
+  // const codeBin = game.code(2);
   const ballCount = game.countBalls();
-  const gameCodeImages = codeImages(game.code(2));
-  const gameCodeImageCount = gameCodeImages.length;
+  // const midDigit = game.code(36).charAt(midCharIndex);
 
   // Don't worry about puzzles that are already solved
   if (ballCount === 1) {
     return res.status(200).json({ alreadySolved: true });
   }
 
+  // CONSIDER SKIPPING THIS PART ENTIRELY - If the puzzle isn't solvable, none of the results of its
+  // next possible moves will by solvable anyway, and time is money understanding a portion of the
+  // sacred timeline must be downloaded every time a list is to be checked
   // Confirm the puzzle is solvable by consulting the list of solvable puzzles
   // of the same ball count
+  /*
   // TO-DO: Refactor to conditionally use 3rd-party cloud or non-Git-tracked local
-  let fName = `${__dirname}/../../sacredTimeline/${ballCount}.bin`;
+  let fName = `${__dirname}/../../sacredTimeline/count-mid/${ballCount}-${midDigit}.bin`;
+  // let fName = `${__dirname}/../../sacredTimeline/count/${ballCount}.bin`;
+  console.log(fName);
+  console.log(codeBin);
   // https://stackoverflow.com/questions/14391690/how-to-capture-no-file-for-fs-readfilesync
   let buf;
   try {
@@ -71,11 +59,9 @@ const hint = (req, res) => {
     while (bitQueue.length >= slotCount && !matchFound) {
       const solvableCode = bitQueue.slice(0, slotCount);
       bitQueue = bitQueue.slice(slotCount);
-      for (let j = 0; j < gameCodeImageCount; j++) {
-        if (gameCodeImages[j] === solvableCode) {
-          matchFound = true;
-          break;
-        }
+      if (codeBin === solvableCode) {
+        matchFound = true;
+        break;
       }
     }
     if (matchFound) break;
@@ -83,28 +69,38 @@ const hint = (req, res) => {
   if (!matchFound) {
     return res.status(200).json({ unsolvable: true });
   }
+  */
 
   // It has been confirmed that the puzzle is solvable. Now to find the next step in the solution,
   // by consulting the list of all solvable puzzles with one less ball.
   // First, get the codes (and their corresponding moves) we are looking for.
   const nextMoves = game.allValidMoves();
+  const nextMovesLen = nextMoves.length;
+
+  if (ballCount === 2) {
+    if (nextMovesLen === 0) {
+      return res.status(200).json({ unsolvable: true });
+    }
+    return res.status(200).json({ hint: nextMoves[0] });
+  }
+
   const potentialHints = [];
-  for (let i = 0; i < nextMoves.length; i++) {
+  for (let i = 0; i < nextMovesLen; i++) {
     const move = nextMoves[i];
     game.makeMove(move);
-    // Remember: if the result of a hint is in the solvables list, or even one of its images is,
-    // that means the result of the hint is solvable, and therefore the hint is valid
-    const codes = codeImages(game.code(2));
     potentialHints.push({
       move,
-      codes,
+      code: game.code(2),
     });
     game.undo();
   }
   const potentialHintsCount = potentialHints.length;
 
-  // TO-DO: See above comment
-  fName = `${__dirname}/../../sacredTimeline/${ballCount - 1}.bin`;
+  // TO-DO: Make use of split-by-middle-digit code files to speed up downloading and parsing
+  // TO-DO: Refactor to conditionally use 3rd-party cloud or non-Git-tracked local
+  const fName = `${__dirname}/../../sacredTimeline/count/${ballCount - 1}.bin`;
+  // console.log(fName);
+  let buf;
   try {
     buf = fs.readFileSync(fName);
   } catch (err) {
@@ -113,7 +109,7 @@ const hint = (req, res) => {
       id: 'problemAccessingHintData',
     });
   }
-  bitQueue = '';
+  let bitQueue = '';
   for (let i = 0; i < buf.byteLength; i++) {
     bitQueue += byteToBits(buf[i]);
     while (bitQueue.length >= slotCount) {
@@ -121,25 +117,16 @@ const hint = (req, res) => {
       bitQueue = bitQueue.slice(slotCount);
       for (let j = 0; j < potentialHintsCount; j++) {
         const potentialHint = potentialHints[j];
-        for (let k = 0; k < potentialHint.codes.length; k++) {
-          if (potentialHint.codes[k] === solvableCode) {
-            return res.status(200).json({ hint: potentialHint.move });
-          }
+        if (potentialHint.code === solvableCode) {
+          return res.status(200).json({ hint: potentialHint.move });
         }
       }
     }
   }
-
-  // This code really shouldn't be reached assuming the "Sacred Timeline" was generated properly.
-  // Manually brute force testing that this can't happen obviously isn't a humanly feasible option.
-  return res.status(500).json({
-    message: 'Solution algorithm has been compromised.',
-    id: 'solutionAlgorithmCompromised',
-  });
+  return res.status(200).json({ unsolvable: true });
 };
 
 module.exports = {
   homepage,
   hint,
-  testHerokuDownloadSpeed,
 };
