@@ -1,7 +1,17 @@
 const fs = require('fs');
 const Game = require('../client/Game.js');
-const { slotCount, convertCodeBase } = require('../client/puzzle.js');
-const { byteToBits, byteFromBitRemainder, formatTime } = require('../client/helpers.js');
+const {
+  slotCount,
+  convertCodeBase,
+  hexaTriDigitStr,
+  midCharIndex,
+} = require('../client/puzzle.js');
+const {
+  byteToBits,
+  byteFromBitRemainder,
+  doneHavingStartedAt,
+  progressPercent,
+} = require('../client/helpers.js');
 const PuzzleSet = require('./PuzzleSet.js');
 
 const ballCountIn = parseInt(process.argv[2] || '1', 10);
@@ -11,51 +21,22 @@ if (Number.isNaN(ballCountIn)
   process.exit(1);
 }
 
-const doneHavingStartedAt = (startTime) => {
-  const timeTaken = Date.now() - startTime;
-  process.stdout.write(`\nDone after ${formatTime(timeTaken)}\n`);
-};
-
-const progressPercent = (progressOutOfThousand, offset) => {
-  const beforeDecimal = progressOutOfThousand.toString().padStart(2, '0').padStart(4, ' ');
-  // https://blog.bitsrc.io/coloring-your-terminal-using-nodejs-eb647d4af2a2
-  const progressText = ` \x1b[32m${beforeDecimal.slice(0, -1)}.${beforeDecimal.slice(-1)}%\x1b[39m`;
-  // https://stackoverflow.com/questions/17309749/node-js-console-log-is-it-possible-to-update-a-line-rather-than-create-a-new-l
-  process.stdout.cursorTo(offset);
-  process.stdout.write(progressText);
-};
-
 const generateCountFile = (ballCount) => {
   if (ballCount === 1) {
     // Make what the list of all one-ball win states would be under the "no symmetries" rule
     process.stdout.write('Initializing win states (wherein 1 ball is left)...');
     const winStates = new PuzzleSet();
     for (let i = 0; i < slotCount; i++) winStates.add(`${'0'.repeat(i)}1${'0'.repeat(slotCount - 1 - i)}`);
-
-    // let bitQueue = Array(slotCount).fill('1').join('0'.repeat(slotCount));
-    const byteList = [];
-    let bitQueue = '';
-    winStates.forEach((winState) => {
-      bitQueue += convertCodeBase(winState, 36, 2);
-      while (bitQueue.length >= 8) {
-        byteList.push(parseInt(bitQueue.slice(0, 8), 2));
-        bitQueue = bitQueue.slice(8);
-      }
-    });
-    if (bitQueue.length > 0) byteList.push(byteFromBitRemainder(bitQueue));
-
-    fs.writeFileSync('1.bin', Buffer.from(byteList));
-    process.stdout.write('\n\n');
+    process.stdout.write('\nDone\n');
+    fs.writeFileSync('count/1.bin', winStates.toBuffer());
   } else {
-    process.stdout.write(`Current set ball count: ${ballCount}\n`);
-
-    const buf = fs.readFileSync(`${ballCount - 1}.bin`);
+    const buf = fs.readFileSync(`count/${ballCount - 1}.bin`);
     const bufSize = buf.byteLength;
     const puzzleCount = Math.floor((bufSize * 8) / slotCount);
     const puzzleCountThousandth = puzzleCount / 1000;
     let puzzlesDone = 0;
-    let progressMessage = 'Finding precursors to previous set...';
-    let progressMessageLen = progressMessage.length;
+    const progressMessage = 'Finding precursors to previous set...';
+    const progressMessageLen = progressMessage.length;
     let progressThousandth = 0;
     let bitQueue = '';
     const solvables = new PuzzleSet(); // This will get very big!
@@ -63,7 +44,7 @@ const generateCountFile = (ballCount) => {
     process.stdout.write(progressMessage);
     progressPercent(0, progressMessageLen);
 
-    let startTime = Date.now();
+    const startTime = Date.now();
     for (let i = 0; i < bufSize; i++) {
       // process.stdout.write(buf[i].toString[i]);
       bitQueue += byteToBits(buf[i]);
@@ -89,45 +70,111 @@ const generateCountFile = (ballCount) => {
     progressPercent(1000, progressMessageLen);
     doneHavingStartedAt(startTime);
 
-    progressMessage = 'Writing precursors to byte list...';
-    progressMessageLen = progressMessage.length;
-    progressThousandth = 0;
-    bitQueue = '';
-    const byteListLen = Math.ceil((solvables.size() * slotCount) / 8);
-    const byteListLenThousandth = byteListLen / 1000;
-    const byteList = new Uint8Array(byteListLen);
-
-    process.stdout.write(progressMessage);
-    progressPercent(0, progressMessageLen);
-
-    let i = 0;
-    let bytesDone = 0;
-    startTime = Date.now();
-    solvables.forEach((solvable) => {
-      bitQueue += convertCodeBase(solvable, 36, 2);
-      while (bitQueue.length >= 8) {
-        byteList[i] = parseInt(bitQueue.slice(0, 8), 2);
-        bitQueue = bitQueue.slice(8);
-        i++;
-        bytesDone++;
-        if (bytesDone >= byteListLenThousandth) {
-          bytesDone -= byteListLenThousandth;
-          progressThousandth++;
-          progressPercent(progressThousandth, progressMessageLen);
-        }
-      }
-    });
-    if (bitQueue.length > 0) byteList[i] = byteFromBitRemainder(bitQueue);
-    progressPercent(1000, progressMessageLen);
-    doneHavingStartedAt(startTime);
-
-    fs.writeFileSync(`${ballCount}.bin`, Buffer.from(byteList));
+    fs.writeFileSync(`count/${ballCount}.bin`, solvables.toBuffer());
   }
+};
+
+const splitCountFile = (ballCount) => {
+  const buf = fs.readFileSync(`count/${ballCount}.bin`);
+  const bufSize = buf.byteLength;
+  const bufSizeThousandth = bufSize / 1000;
+
+  const puzzleCounts = {};
+  for (let i = 0; i < 36; i++) {
+    const c = hexaTriDigitStr.charAt(i);
+    puzzleCounts[c] = 0;
+  }
+
+  let progressMessage = 'Allocating split file sizes...';
+  let progressMessageLen = progressMessage.length;
+  let progressThousandth = 0;
+  process.stdout.write(progressMessage);
+  progressPercent(0, progressMessageLen);
+
+  let bitQueueAll = '';
+  let puzzleCountAll = 0;
+  let bytesDone = 0;
+  let startTime = Date.now();
+  for (let i = 0; i < bufSize; i++) {
+    bitQueueAll += byteToBits(buf[i]);
+    while (bitQueueAll.length >= slotCount) {
+      const binCode = bitQueueAll.slice(0, slotCount);
+      bitQueueAll = bitQueueAll.slice(slotCount);
+      puzzleCounts[convertCodeBase(binCode, 2, 36).charAt(midCharIndex)]++;
+      puzzleCountAll++;
+    }
+
+    bytesDone++;
+    while (bytesDone > bufSizeThousandth) {
+      bytesDone -= bufSizeThousandth;
+      progressThousandth++;
+      progressPercent(progressThousandth, progressMessageLen);
+    }
+  }
+  progressPercent(1000, progressMessageLen);
+  doneHavingStartedAt(startTime);
+
+  const puzzleCountAllThousandth = puzzleCountAll / 1000;
+
+  const bitQueues = {};
+  const byteLists = {};
+  const byteListIndexes = {};
+  for (let i = 0; i < 36; i++) {
+    const c = hexaTriDigitStr.charAt(i);
+    bitQueues[c] = '';
+    byteLists[c] = new Uint8Array(Math.ceil((puzzleCounts[c] * slotCount) / 8));
+    byteListIndexes[c] = 0;
+  }
+
+  progressMessage = 'Writing to split files...';
+  progressMessageLen = progressMessage.length;
+  progressThousandth = 0;
+  process.stdout.write(progressMessage);
+  progressPercent(0, progressMessageLen);
+
+  let puzzlesDone = 0;
+  bitQueueAll = '';
+  startTime = Date.now();
+  for (let i = 0; i < bufSize; i++) {
+    bitQueueAll += byteToBits(buf[i]);
+    while (bitQueueAll.length >= slotCount) {
+      const binCode = bitQueueAll.slice(0, slotCount);
+      bitQueueAll = bitQueueAll.slice(slotCount);
+      const c = convertCodeBase(binCode, 2, 36).charAt(midCharIndex);
+      bitQueues[c] += binCode;
+      while (bitQueues[c].length >= 8) {
+        byteLists[c][byteListIndexes[c]] = parseInt(bitQueues[c].slice(0, 8), 2);
+        byteListIndexes[c]++;
+        bitQueues[c] = bitQueues[c].slice(8);
+      }
+
+      puzzlesDone++;
+      while (puzzlesDone > puzzleCountAllThousandth) {
+        puzzlesDone -= puzzleCountAllThousandth;
+        progressThousandth++;
+        progressPercent(progressThousandth, progressMessageLen);
+      }
+    }
+  }
+  progressPercent(1000, progressMessageLen);
+
+  for (let i = 0; i < 36; i++) {
+    const c = hexaTriDigitStr.charAt(i);
+    if (bitQueues[c].length > 0) {
+      byteLists[c][byteListIndexes[c]] = byteFromBitRemainder(bitQueues[c]);
+    }
+    fs.writeFileSync(`count-mid/${ballCount}-${c}.bin`, byteLists[c]);
+  }
+
+  doneHavingStartedAt(startTime);
 };
 
 // Now, keep going until the whole cache is generated, or the program is stopped midway
 // via user or crash (hence ballCountIn to pick up where the program left off)
 for (let i = ballCountIn; i < slotCount; i++) {
+  // const i = ballCountIn;
+  process.stdout.write(`Current set ball count: ${i}\n`);
   generateCountFile(i);
+  splitCountFile(i);
   process.stdout.write('\n');
 }

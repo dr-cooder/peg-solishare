@@ -168,7 +168,9 @@ const defaultCodeBase = 16;
 // https://www.sitepoint.com/using-regular-expressions-to-check-string-length/
 // https://www.webtips.dev/webtips/javascript/javascript-create-regex-from-string-variable
 const codeRegExps = [];
-for (let i = 2; i <= 36; i++) codeRegExps[i] = new RegExp(`^[${'0123456789abcdefghijklmnopqrstuvwxyz'.slice(0, i)}]{${codeLengths[i]}}$`);
+const hexaTriDigitStr = '0123456789abcdefghijklmnopqrstuvwxyz';
+const midCharIndex = 2;
+for (let i = 2; i <= 36; i++) codeRegExps[i] = new RegExp(`^[${hexaTriDigitStr.slice(0, i)}]{${codeLengths[i]}}$`);
 const isCode = (code, base = defaultCodeBase) => codeRegExps[base].test(code);
 
 const isPuzzle = (obj) => {
@@ -260,8 +262,8 @@ module.exports = {
   slotCount,
   validMoveDeltas,
   validMoveDeltaCount,
-  // symmetries,
-  // symmetryKVPs,
+  hexaTriDigitStr,
+  midCharIndex,
   isCode,
   isPuzzle,
   copyPuzzle,
