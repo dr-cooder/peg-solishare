@@ -168,9 +168,7 @@ const defaultCodeBase = 16;
 // https://www.sitepoint.com/using-regular-expressions-to-check-string-length/
 // https://www.webtips.dev/webtips/javascript/javascript-create-regex-from-string-variable
 const codeRegExps = [];
-const hexaTriDigitStr = '0123456789abcdefghijklmnopqrstuvwxyz';
-const midCharIndex = 2;
-for (let i = 2; i <= 36; i++) codeRegExps[i] = new RegExp(`^[${hexaTriDigitStr.slice(0, i)}]{${codeLengths[i]}}$`);
+for (let i = 2; i <= 36; i++) codeRegExps[i] = new RegExp(`^[${'0123456789abcdefghijklmnopqrstuvwxyz'.slice(0, i)}]{${codeLengths[i]}}$`);
 const isCode = (code, base = defaultCodeBase) => codeRegExps[base].test(code);
 
 const isPuzzle = (obj) => {
@@ -236,7 +234,7 @@ const codeToPuzzle = (code, base = defaultCodeBase) => {
   return puzzle;
 };
 
-// DOES NOT VALIDATE GRID BY ITSELF FOR PERFORMANCE REASONS
+// DOES NOT VALIDATE PUZZLE BY ITSELF FOR PERFORMANCE REASONS
 const puzzleToCode = (puzzle, base = defaultCodeBase) => {
   let codeBin = '';
 
@@ -255,6 +253,30 @@ const puzzleToCode = (puzzle, base = defaultCodeBase) => {
   return (base === 2) ? codeBin : convertCodeBase(codeBin, 2, base);
 };
 
+const countBalls = (puzzle) => {
+  let ballCount = 0;
+  for (let v = 0; v < height; v++) {
+    for (let u = 0; u < width; u++) {
+      if (puzzle[v][u] === 1) ballCount++;
+    }
+  }
+  return ballCount;
+};
+
+const codeSampleIndexes = [
+  4,
+  14, 16, 18,
+  28,
+];
+const codeSampleIndexCount = codeSampleIndexes.length;
+const sampleCode = (binCode) => {
+  let sampleBin = '';
+  for (let i = 0; i < codeSampleIndexCount; i++) {
+    sampleBin += binCode.charAt(codeSampleIndexes[i]);
+  }
+  return parseInt(sampleBin, 2);
+};
+
 module.exports = {
   emptyBoard,
   width,
@@ -262,8 +284,6 @@ module.exports = {
   slotCount,
   validMoveDeltas,
   validMoveDeltaCount,
-  hexaTriDigitStr,
-  midCharIndex,
   isCode,
   isPuzzle,
   copyPuzzle,
@@ -274,4 +294,6 @@ module.exports = {
   transform,
   isometryCount,
   codeImages,
+  countBalls,
+  sampleCode,
 };

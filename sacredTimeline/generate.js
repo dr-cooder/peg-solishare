@@ -2,9 +2,7 @@ const fs = require('fs');
 const Game = require('../client/Game.js');
 const {
   slotCount,
-  convertCodeBase,
-  hexaTriDigitStr,
-  midCharIndex,
+  sampleCode,
 } = require('../client/puzzle.js');
 const {
   byteToBits,
@@ -79,10 +77,9 @@ const splitCountFile = (ballCount) => {
   const bufSize = buf.byteLength;
   const bufSizeThousandth = bufSize / 1000;
 
-  const puzzleCounts = {};
-  for (let i = 0; i < 36; i++) {
-    const c = hexaTriDigitStr.charAt(i);
-    puzzleCounts[c] = 0;
+  const puzzleCounts = [];
+  for (let s = 0; s < 32; s++) {
+    puzzleCounts[s] = 0;
   }
 
   let progressMessage = 'Allocating split file sizes...';
@@ -100,7 +97,7 @@ const splitCountFile = (ballCount) => {
     while (bitQueueAll.length >= slotCount) {
       const binCode = bitQueueAll.slice(0, slotCount);
       bitQueueAll = bitQueueAll.slice(slotCount);
-      puzzleCounts[convertCodeBase(binCode, 2, 36).charAt(midCharIndex)]++;
+      puzzleCounts[sampleCode(binCode)]++;
       puzzleCountAll++;
     }
 
@@ -116,14 +113,14 @@ const splitCountFile = (ballCount) => {
 
   const puzzleCountAllThousandth = puzzleCountAll / 1000;
 
-  const bitQueues = {};
-  const byteLists = {};
-  const byteListIndexes = {};
-  for (let i = 0; i < 36; i++) {
-    const c = hexaTriDigitStr.charAt(i);
-    bitQueues[c] = '';
-    byteLists[c] = new Uint8Array(Math.ceil((puzzleCounts[c] * slotCount) / 8));
-    byteListIndexes[c] = 0;
+  const bitQueues = [];
+  const byteLists = [];
+  const byteListIndexes = [];
+  // Ensure the types of the arrays' contents have been declared
+  for (let s = 0; s < 32; s++) {
+    bitQueues[s] = '';
+    byteLists[s] = new Uint8Array(Math.ceil((puzzleCounts[s] * slotCount) / 8));
+    byteListIndexes[s] = 0;
   }
 
   progressMessage = 'Writing to split files...';
@@ -140,12 +137,12 @@ const splitCountFile = (ballCount) => {
     while (bitQueueAll.length >= slotCount) {
       const binCode = bitQueueAll.slice(0, slotCount);
       bitQueueAll = bitQueueAll.slice(slotCount);
-      const c = convertCodeBase(binCode, 2, 36).charAt(midCharIndex);
-      bitQueues[c] += binCode;
-      while (bitQueues[c].length >= 8) {
-        byteLists[c][byteListIndexes[c]] = parseInt(bitQueues[c].slice(0, 8), 2);
-        byteListIndexes[c]++;
-        bitQueues[c] = bitQueues[c].slice(8);
+      const s = sampleCode(binCode);
+      bitQueues[s] += binCode;
+      while (bitQueues[s].length >= 8) {
+        byteLists[s][byteListIndexes[s]] = parseInt(bitQueues[s].slice(0, 8), 2);
+        byteListIndexes[s]++;
+        bitQueues[s] = bitQueues[s].slice(8);
       }
 
       puzzlesDone++;
@@ -158,23 +155,25 @@ const splitCountFile = (ballCount) => {
   }
   progressPercent(1000, progressMessageLen);
 
-  for (let i = 0; i < 36; i++) {
-    const c = hexaTriDigitStr.charAt(i);
-    if (bitQueues[c].length > 0) {
-      byteLists[c][byteListIndexes[c]] = byteFromBitRemainder(bitQueues[c]);
+  for (let s = 0; s < 32; s++) {
+    // Deal with remainders
+    if (bitQueues[s].length > 0) {
+      byteLists[s][byteListIndexes[s]] = byteFromBitRemainder(bitQueues[s]);
     }
-    fs.writeFileSync(`count-mid/${ballCount}-${c}.bin`, byteLists[c]);
+    // Write the file
+    fs.writeFileSync(`count-sample/${ballCount}-${s}.bin`, Buffer.from(byteLists[s]));
   }
 
   doneHavingStartedAt(startTime);
 };
 
 // Now, keep going until the whole cache is generated, or the program is stopped midway
-// via user or crash (hence ballCountIn to pick up where the program left off)
+// via user or crash (hence ballCountIn to pick up where the program left off) (also the
+// latter of which I hope I've fixed)
 for (let i = ballCountIn; i < slotCount; i++) {
-  // const i = ballCountIn;
   process.stdout.write(`Current set ball count: ${i}\n`);
   generateCountFile(i);
   splitCountFile(i);
   process.stdout.write('\n');
 }
+process.stdout.write('\x1b[32m*** ALL DONE!!! ***\x1b[39m');

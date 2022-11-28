@@ -12,6 +12,7 @@ const {
   codeToPuzzle,
   puzzleToCode,
   defaultCodeBase,
+  countBalls,
 } = require('./puzzle.js');
 
 class Game {
@@ -152,13 +153,7 @@ class Game {
   }
 
   countBalls() {
-    let ballCount = 0;
-    for (let v = 0; v < height; v++) {
-      for (let u = 0; u < width; u++) {
-        if (this.puzzle[v][u] === 1) ballCount++;
-      }
-    }
-    return ballCount;
+    return countBalls(this.puzzle);
   }
 
   // Once again, disused until further notice due to inviability
