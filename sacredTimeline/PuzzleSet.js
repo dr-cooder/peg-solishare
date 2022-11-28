@@ -10,7 +10,6 @@ const { slotCount } = require('../client/puzzle.js');
 const indexBinDigits = slotCount - 3;
 const contentsSize = 2 ** (indexBinDigits);
 
-// https://github.com/nodejs/node/issues/37320
 class PuzzleSet {
   constructor() {
     this.contents = new Uint8Array(contentsSize);
