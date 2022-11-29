@@ -78,8 +78,8 @@ if (timelineDirectory && timelineUrlPattern) {
         const url = `${urlLeft}${json[`${count}-${sample}.bin`]}${urlRight}`;
         console.log(url);
         const partResponse = await fetch(url);
-        const partBuffer = await partResponse.arrayBuffer();
-        return partBuffer;
+        const partArrayBuffer = await partResponse.arrayBuffer();
+        return Buffer.from(partArrayBuffer);
       });
     }).catch((err) => {
       console.log('Unable to parse timeline directory JSON.');
