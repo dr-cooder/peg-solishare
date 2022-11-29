@@ -77,10 +77,10 @@ const hint = async (req, res, getTimelinePart) => {
     for (let j = 0; j < potentialHintsThisBuf.length; j++) {
       const potentialHint = potentialHintsThisBuf[j];
       console.log(potentialHint.code);
-      console.log(buf.length);
+      console.log(cachePartBufs.length, buf.byteLength);
       // Look for the hint within the buffer
       bitQueue = '';
-      for (let k = 0; k < buf.length; k++) {
+      for (let k = 0; k < buf.byteLength; k++) {
         bitQueue += byteToBits(buf[k]);
         while (bitQueue.length >= slotCount) {
           const solvableCode = bitQueue.slice(0, slotCount);
