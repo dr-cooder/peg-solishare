@@ -93,7 +93,7 @@ const GamePage = (props) => {
   const getHint = async (code) => {
     if (hintWaiting) return null;
     setHintWaiting(true);
-    setHintText('Awaiting hint...');
+    setHintText(<><div class="spinner-border" role="status"><span class="sr-only">Loading...</span></div> Finding hint...</>);
     const response = await fetch(`/hint?code=${code}`);
     const { hint, unsolvable, alreadySolved, message } = await response.json();
     setHintWaiting(false);

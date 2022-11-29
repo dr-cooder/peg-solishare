@@ -76,7 +76,6 @@ if (timelineDirectory && timelineUrlPattern) {
     response.json().then((json) => {
       start(async (count, sample) => {
         const url = `${urlLeft}${json[`${count}-${sample}.bin`]}${urlRight}`;
-        console.log(url);
         const partResponse = await fetch(url);
         const partArrayBuffer = await partResponse.arrayBuffer();
         return Buffer.from(partArrayBuffer);
