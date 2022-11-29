@@ -7,6 +7,7 @@ const bodyParser = require('body-parser');
 const helmet = require('helmet');
 const expressHandlebars = require('express-handlebars');
 const mongoose = require('mongoose');
+const fs = require('fs');
 
 const router = require('./router.js');
 
@@ -56,9 +57,36 @@ app.set('views', `${__dirname}/../views`);
 app.use(cookieParser());
 app.disable('x-powered-by');
 
-router(app);
+// Don't start until the timeline directory has been loaded
+const start = (getTimelinePart) => {
+  router(app, getTimelinePart);
+  app.listen(port, (err) => {
+    if (err) throw err;
+    console.log(`Listening on port ${port}`);
+  });
+};
 
-app.listen(port, (err) => {
-  if (err) throw err;
-  console.log(`Listening on port ${port}`);
-});
+const timelineDirectory = process.env.TIMELINE_DIRECTORY;
+const timelineUrlPattern = process.env.TIMELINE_URL_PATTERN;
+if (timelineDirectory && timelineUrlPattern) {
+  const urlPatternSplit = timelineUrlPattern.split('|');
+  const urlLeft = urlPatternSplit[0];
+  const urlRight = urlPatternSplit[1] || '';
+  fetch(timelineDirectory).then((response) => {
+    response.json().then((json) => {
+      start(async (count, sample) => {
+        const partResponse = await fetch(`${urlLeft}${json[`${count}-${sample}.bin`]}${urlRight}`);
+        const partBuffer = await partResponse.arrayBuffer();
+        return partBuffer;
+      });
+    }).catch((err) => {
+      console.log('Unable to parse timeline directory JSON.');
+      throw err;
+    });
+  }).catch((err) => {
+    console.log('Unable to fetch timeline directory. Please ensure the environment variable is a working link.');
+    throw err;
+  });
+} else {
+  start((count, sample) => fs.readFileSync(`${__dirname}/../sacredTimeline/count-sample/${count}-${sample}.bin`));
+}

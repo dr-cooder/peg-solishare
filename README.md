@@ -21,6 +21,7 @@ In Peg SoliShare, players can play Peg Solitaire puzzles created by other player
 - https://hwpi.harvard.edu/assetslibrary/host-css-or-js-file-google-drive
 - https://blog.bitsrc.io/coloring-your-terminal-using-nodejs-eb647d4af2a2
 - https://stackoverflow.com/questions/17309749/node-js-console-log-is-it-possible-to-update-a-line-rather-than-create-a-new-l
+- https://webapps.stackexchange.com/questions/88769/get-share-link-of-multiple-files-in-google-drive-to-put-in-spreadsheet
 - Bootstrap documentation
 ### External Components
 - Bootstrap

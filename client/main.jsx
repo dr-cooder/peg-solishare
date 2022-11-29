@@ -118,8 +118,8 @@ const GamePage = (props) => {
 
   return (
     <div className="wrapper">
-      <h1>Disappearing Act 2</h1>
-      <h2>Created by: Hopper</h2>
+      <h1>Disappearing Act 3</h1>
+      <h2>Created by: Rory</h2>
       <GameBoardUI ref={gameRef} disabled={hintWaiting} basis={samples[props.puzzleName]} onMove={handleMove}/>
       <div className="buttonContainer">
         <button id="hintButton" type="button" className="btn btn-warning btn-lg" disabled={hintWaiting}
@@ -137,7 +137,7 @@ const GamePage = (props) => {
 }
 
 const init = () => {
-  ReactDOM.createRoot(document.getElementById('app')).render(<GamePage puzzleName="disappearingAct2"/>);
+  ReactDOM.createRoot(document.getElementById('app')).render(<GamePage puzzleName="disappearingAct3"/>);
 }
 
 window.onload = init;
