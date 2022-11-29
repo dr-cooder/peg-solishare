@@ -77,6 +77,7 @@ const hint = async (req, res, getTimelinePart) => {
     for (let j = 0; j < potentialHintsThisBuf.length; j++) {
       const potentialHint = potentialHintsThisBuf[j];
       console.log(potentialHint.code);
+      console.log(buf.length);
       // Look for the hint within the buffer
       bitQueue = '';
       for (let k = 0; k < buf.length; k++) {
