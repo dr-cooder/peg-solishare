@@ -75,9 +75,12 @@ if (timelineDirectory && timelineUrlPattern) {
   fetch(timelineDirectory).then((response) => {
     response.json().then((json) => {
       start(async (count, sample) => {
-        const partResponse = await fetch(`${urlLeft}${json[`${count}-${sample}.bin`]}${urlRight}`);
-        const partBuffer = await partResponse.arrayBuffer();
-        return partBuffer;
+        const binId = json[`${count}-${sample}.bin`];
+        if (!binId) return Buffer.from([]);
+        const url = `${urlLeft}${binId}${urlRight}`;
+        const partResponse = await fetch(url);
+        const partArrayBuffer = await partResponse.arrayBuffer();
+        return Buffer.from(partArrayBuffer);
       });
     }).catch((err) => {
       console.log('Unable to parse timeline directory JSON.');
@@ -88,5 +91,11 @@ if (timelineDirectory && timelineUrlPattern) {
     throw err;
   });
 } else {
-  start((count, sample) => fs.readFileSync(`${__dirname}/../sacredTimeline/count-sample/${count}-${sample}.bin`));
+  start((count, sample) => {
+    try {
+      return fs.readFileSync(`${__dirname}/../sacredTimeline/count-sample/${count}-${sample}.bin`);
+    } catch (err) {
+      return Buffer.from([]);
+    }
+  });
 }

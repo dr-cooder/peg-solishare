@@ -35,3 +35,11 @@
   max-width: max-content;
   margin-bottom: 1rem;
 }
+
+.buttonContainer > button {
+  width: 8rem;
+}
+
+.undoButtonHighlighted {
+  outline: 6px solid deepskyblue;
+}

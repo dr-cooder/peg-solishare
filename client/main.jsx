@@ -86,34 +86,39 @@ const samples = {
 };
 
 const GamePage = (props) => {
-  const [hintText, setHintText] = useState();
+  const [errorMessage, setErrorMessage] = useState();
+  const [undoHighlighted, setUndoHighlighted] = useState(false);
   const [hintWaiting, setHintWaiting] = useState(false);
+  const [hintIsOnDisplay, setHintIsOnDisplay] = useState(false);
   const gameRef = createRef();
 
-  const getHint = async (code) => {
+  const getHint = async (gameRefCurrent) => {
+    const code = gameRefCurrent.code();
     if (hintWaiting) return null;
     setHintWaiting(true);
-    setHintText('Awaiting hint...');
+    // setHintText(<><div class="spinner-border" role="status"><span class="sr-only">Loading...</span></div> Finding hint...</>);
     const response = await fetch(`/hint?code=${code}`);
     const { hint, unsolvable, alreadySolved, message } = await response.json();
     setHintWaiting(false);
     if (response.status !== 200) {
-      setHintText(message)
+      setErrorMessage(message)
     } else if (unsolvable) {
-      setHintText('Not solvable from this point! Please undo.');
+      setUndoHighlighted(true);
+      setHintIsOnDisplay(true);
     } else if (alreadySolved) {
-      setHintText('This puzzle has already been solved!');
+      setErrorMessage('This puzzle has already been solved!');
     } else if (hint) {
-      setHintText(<>
-        {'('}{hint.from.x + 1}, {hint.from.y + 1}{')'} <i className="fa fa-solid fa-arrow-right"></i> {'('}{hint.to.x + 1}, {hint.to.y + 1}{')'}
-      </>);
+      gameRefCurrent.displayHint(hint);
+      setHintIsOnDisplay(true);
     } else {
-      setHintText('Unexpected server response.');
+      setErrorMessage('Unexpected server response.');
     }
   }
 
   const handleMove = () => {
-    setHintText('');
+    setErrorMessage('');
+    setUndoHighlighted(false);
+    setHintIsOnDisplay(false);
   }
 
   return (
@@ -122,16 +127,22 @@ const GamePage = (props) => {
       <h2>Created by: Rory</h2>
       <GameBoardUI ref={gameRef} disabled={hintWaiting} basis={samples[props.puzzleName]} onMove={handleMove}/>
       <div className="buttonContainer">
-        <button id="hintButton" type="button" className="btn btn-warning btn-lg" disabled={hintWaiting}
+        <button id="hintButton" type="button" className="btn btn-warning btn-lg" disabled={hintIsOnDisplay || hintWaiting}
           onClick={() => {
-            getHint(gameRef.current.code());
-          }}><i className="fa-regular fa-lightbulb"></i> Hint</button>
-        <button id="undoButton" type="button" className="btn btn-secondary btn-lg" disabled={hintWaiting}
+            getHint(gameRef.current);
+          }}>
+            {hintWaiting ?
+              <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              :
+              <i className={hintIsOnDisplay ? `fa-solid fa-arrow-${undoHighlighted ? 'right' : 'up'}` : 'fa-regular fa-lightbulb'}></i>
+            } Hint
+        </button>
+        <button id="undoButton" type="button" className={`btn btn-secondary btn-lg ${undoHighlighted ? 'undoButtonHighlighted' : ''}`} disabled={hintWaiting}
           onClick={() => {
             gameRef.current.undo();
           }}><i className="fa-solid fa-arrow-rotate-left"></i> Undo</button>
       </div>
-      <h3>{hintText}</h3>
+      <h3>{errorMessage}</h3>
     </div>
   );
 }

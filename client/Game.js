@@ -13,6 +13,7 @@ const {
   puzzleToCode,
   defaultCodeBase,
   countBalls,
+  validateMoveStruct,
 } = require('./puzzle.js');
 
 class Game {
@@ -35,8 +36,7 @@ class Game {
   // If move is valid, returns valid move delta type (right, up, left, down), otherwise returns null
   validateMove(move, reverse) {
     // Ensure passed-in move has the required properties
-    if (!(move && move.from && typeof move.from.x === 'number' && typeof move.from.y === 'number'
-      && move.to && typeof move.to.x === 'number' && typeof move.from.y === 'number')) return null;
+    if (!validateMoveStruct(move)) return null;
     const fromX = move.from.x;
     const fromY = move.from.y;
     const toX = move.to.x;
@@ -83,8 +83,6 @@ class Game {
   }
 
   allValidMoves(reverse) {
-    // Check for symmetries here - every move has a corresponding one with flipped dir+mag
-    // Possible moves are symmetrical <=> Board is symmetrical (THAT'S NOT TRUE UGH I'M AN IDIOT)
     const validMoves = [];
     // Iterate through every puzzle space
     for (let v = 0; v < height; v++) {
@@ -155,104 +153,6 @@ class Game {
   countBalls() {
     return countBalls(this.puzzle);
   }
-
-  // Once again, disused until further notice due to inviability
-  /*
-  getSymmetries() {
-    const applicableSymmetries = [];
-
-    for (let i = 0; i < symmetryKVPs.length; i++) {
-      const [symmetryName, symmentryTransform] = symmetryKVPs[i];
-      let symmetryApplicable = true;
-
-      for (let v = 0; v < height; v++) {
-        for (let u = 0; u < width; u++) {
-          // SKIP IF NO SLOT
-          const { x: uPrime, y: vPrime } = symmentryTransform({ x: u, y: v });
-          if (this.puzzle[v][u] !== this.puzzle[vPrime][uPrime]) {
-            symmetryApplicable = false;
-            break;
-          }
-        }
-        if (!symmetryApplicable) break;
-      }
-
-      if (symmetryApplicable) applicableSymmetries.push(symmetryName);
-    }
-
-    return applicableSymmetries;
-  }
-  */
-
-  // LIKELY OBSOLETE - we should only ever really need to see one move ahead/behind,
-  // in which case only a single allValidMoves call should be necessary
-  /*
-  generation(moveDiffInitial = 0, base = defaultCodeBase) {
-    const testGame = new Game(copyPuzzle(this.puzzle));
-    const codes = new Set();
-    const reverse = moveDiffInitial < 0;
-
-    const generationRecursive = (moveDiff) => {
-      if (moveDiff === 0) {
-        codes.add(testGame.code(base));
-      } else {
-        const nextMoves = testGame.allValidMoves(reverse);
-        for (let i = 0; i < nextMoves.length; i++) {
-          const nextMove = nextMoves[i];
-          testGame.makeMove(nextMove, reverse);
-          generationRecursive(moveDiff + (reverse ? 1 : -1));
-          testGame.undo(reverse);
-        }
-      }
-    };
-
-    generationRecursive(moveDiffInitial);
-    return codes;
-  }
-  */
-
-  // THIS IS AN OBSOLETE FUNCTION - solving, giving hints, and verifying solvability
-  // is to be done server-side via the Sacred Timeline
-  // (Earlier comment:) DO NOT CALL WITHOUT VERIFYING THE PUZZLE IS SOLVABLE FIRST
-  // If solve is called on an unsolvable puzzle, this will be found the "hard way" resource-wise;
-  // Every possible set of moves will be made only for the function to return null
-  /*
-  solve() {
-    const testGame = new Game(copyPuzzle(this.puzzle));
-    let ballCount = testGame.countBalls();
-    const testMoveHistory = [];
-
-    const solveRecursive = () => {
-      if (ballCount === 1) {
-        // If a win state has been reached, register the move history as a solution
-        return testMoveHistory;
-      }
-      // check for symmetries
-      // For every possible move
-      const moves = testGame.allValidMoves();
-      for (let i = 0; i < moves.length; i++) {
-        const move = moves[i];
-
-        // Make the move and add it to the record
-        testGame.makeMove(move);
-        ballCount--;
-        testMoveHistory.push(move);
-
-        // Keep branching, wait until all sub-branches are done
-        const solution = solveRecursive();
-        if (solution) return solution;
-
-        // Undo the move and remove it from the record
-        testGame.makeMove(move, true);
-        ballCount++;
-        testMoveHistory.pop();
-      }
-      return null;
-    };
-
-    return solveRecursive();
-  }
-  */
 
   // Just for testing purposes
   puzzleToString() {

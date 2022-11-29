@@ -26,6 +26,6 @@ In Peg SoliShare, players can play Peg Solitaire puzzles created by other player
 ### External Components
 - Bootstrap
 ## To-Do
-- Finish generating Sacred Timeline / consider abstaining from symmetry rule; data may be smaller but match finding in real time is slower and more intensive
+- User account functionality
 - Puzzle-creation UI similar to normal gameplay, only balls are either placed manually or generated from reverse-moves; after which it can be uploaded (after being verified as solvable of course)
 - After all of the above is done: online functionality ("Course World"); create and upload, or browse and play (rating system? keep track of high scores?) 

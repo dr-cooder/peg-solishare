@@ -2,6 +2,7 @@ const fs = require('fs');
 const Game = require('../client/Game.js');
 const {
   slotCount,
+  codeSampleRange,
   sampleCode,
 } = require('../client/puzzle.js');
 const {
@@ -78,7 +79,7 @@ const splitCountFile = (ballCount) => {
   const bufSizeThousandth = bufSize / 1000;
 
   const puzzleCounts = [];
-  for (let s = 0; s < 32; s++) {
+  for (let s = 0; s < codeSampleRange; s++) {
     puzzleCounts[s] = 0;
   }
 
@@ -117,7 +118,7 @@ const splitCountFile = (ballCount) => {
   const byteLists = [];
   const byteListIndexes = [];
   // Ensure the types of the arrays' contents have been declared
-  for (let s = 0; s < 32; s++) {
+  for (let s = 0; s < codeSampleRange; s++) {
     bitQueues[s] = '';
     byteLists[s] = new Uint8Array(Math.ceil((puzzleCounts[s] * slotCount) / 8));
     byteListIndexes[s] = 0;
@@ -155,7 +156,7 @@ const splitCountFile = (ballCount) => {
   }
   progressPercent(1000, progressMessageLen);
 
-  for (let s = 0; s < 32; s++) {
+  for (let s = 0; s < codeSampleRange; s++) {
     // Deal with remainders
     if (bitQueues[s].length > 0) {
       byteLists[s][byteListIndexes[s]] = byteFromBitRemainder(bitQueues[s]);

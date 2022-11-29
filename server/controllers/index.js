@@ -2,6 +2,7 @@ const Game = require('../../client/Game.js');
 const {
   slotCount,
   isCode,
+  codeSampleRange,
   sampleCode,
 } = require('../../client/puzzle.js');
 const { byteToBits } = require('../../client/helpers.js');
@@ -44,7 +45,7 @@ const hint = async (req, res, getTimelinePart) => {
   // Separate potential hints (possible moves from the given code and their resulting codes)
   // by their samples
   const potentialHints = [];
-  for (let s = 0; s < 32; s++) {
+  for (let s = 0; s < codeSampleRange; s++) {
     potentialHints[s] = [];
   }
   for (let i = 0; i < nextMovesLen; i++) {
@@ -78,7 +79,7 @@ const hint = async (req, res, getTimelinePart) => {
       const potentialHint = potentialHintsThisBuf[j];
       // Look for the hint within the buffer
       bitQueue = '';
-      for (let k = 0; k < buf.length; k++) {
+      for (let k = 0; k < buf.byteLength; k++) {
         bitQueue += byteToBits(buf[k]);
         while (bitQueue.length >= slotCount) {
           const solvableCode = bitQueue.slice(0, slotCount);
