@@ -8,6 +8,10 @@ const helmet = require('helmet');
 const expressHandlebars = require('express-handlebars');
 const mongoose = require('mongoose');
 const fs = require('fs');
+const session = require('express-session');
+const RedisStore = require('connect-redis')(session);
+const redis = require('redis');
+const csrf = require('csurf');
 
 const router = require('./router.js');
 
@@ -20,6 +24,14 @@ mongoose.connect(dbURI, (err) => {
     throw err;
   }
 });
+
+const redisURL = process.env.REDISCLOUD_URL || 'URI_GOES_HERE';
+
+const redisClient = redis.createClient({
+  legacyMode: true,
+  url: redisURL,
+});
+redisClient.connect().catch(console.error);
 
 const app = express();
 
@@ -46,16 +58,39 @@ app.use(helmet({
     },
   },
 }));
+
 app.use('/assets', express.static(path.resolve(`${__dirname}/../hosted/`)));
 app.use(favicon(`${__dirname}/../hosted/img/favicon.png`));
 app.use(compression());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.engine('handlebars', expressHandlebars.engine({ defaultLayout: '' }));
+
+app.use(session({
+  key: 'sessionId',
+  store: new RedisStore({
+    client: redisClient,
+  }),
+  secret: 'WOAH! My spare tire\'s gone!',
+  resave: true,
+  saveUninitialized: true,
+  cookie: {
+    httpOnly: true,
+  },
+}));
+
 app.set('view engine', 'handlebars');
 app.set('views', `${__dirname}/../views`);
 app.use(cookieParser());
 app.disable('x-powered-by');
+
+app.use(csrf());
+app.use((err, req, res, next) => {
+  if (err.code !== 'EBADCSRFTOKEN') return next(err);
+
+  console.log('Missing CSRF token!');
+  return false;
+});
 
 // Don't start until the timeline directory has been loaded
 const start = (getTimelinePart) => {

@@ -293,6 +293,7 @@ module.exports = {
   slotCount,
   validMoveDeltas,
   validMoveDeltaCount,
+  codeRegExps,
   isCode,
   isPuzzle,
   copyPuzzle,
