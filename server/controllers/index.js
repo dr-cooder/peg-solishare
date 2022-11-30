@@ -7,7 +7,13 @@ const {
 } = require('../../client/puzzle.js');
 const { byteToBits } = require('../../client/helpers.js');
 
-const homepage = (req, res) => res.render('homepage');
+const home = (req, res) => res.render('home');
+
+const play = (req, res) => res.render('play', {
+  title: 'Disappearing Act 3',
+  creator: 'Rory',
+  code: '000010001110001111101111111000000',
+});
 
 const hint = async (req, res, getTimelinePart) => {
   // TO-DO: Create a stateful hint cache (of a fixed "circular" length?)
@@ -97,6 +103,7 @@ const hint = async (req, res, getTimelinePart) => {
 };
 
 module.exports = {
-  homepage,
+  home,
+  play,
   hint,
 };

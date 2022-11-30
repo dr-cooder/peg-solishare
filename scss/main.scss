@@ -1,4 +1,8 @@
-.wrapper > * {
+.playTitle, .playCreator {
+  text-align: center;
+}
+
+#playUI > * {
   text-align: center;
   margin-left: auto;
   margin-right: auto;
@@ -29,14 +33,14 @@
   height: inherit;
 }
 
-.buttonContainer {
+.buttonContainerFlex {
   display: flex;
   gap: 1rem;
   max-width: max-content;
   margin-bottom: 1rem;
 }
 
-.buttonContainer > button {
+.buttonContainerFlex > button {
   width: 8rem;
 }
 
