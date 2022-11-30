@@ -13,23 +13,20 @@ const RedisStore = require('connect-redis')(session);
 const redis = require('redis');
 const csrf = require('csurf');
 
+const config = require('./config.js');
+
 const router = require('./router.js');
 
-const port = process.env.PORT || process.env.NODE_PORT || 3000;
-
-const dbURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1/PegSoliShare';
-mongoose.connect(dbURI, (err) => {
+mongoose.connect(config.connections.mongo, (err) => {
   if (err) {
     console.log('Could not connect to database');
     throw err;
   }
 });
 
-const redisURL = process.env.REDISCLOUD_URL || 'URI_GOES_HERE';
-
 const redisClient = redis.createClient({
   legacyMode: true,
-  url: redisURL,
+  url: config.connections.redis,
 });
 redisClient.connect().catch(console.error);
 
@@ -59,7 +56,7 @@ app.use(helmet({
   },
 }));
 
-app.use('/assets', express.static(path.resolve(`${__dirname}/../hosted/`)));
+app.use('/assets', express.static(path.resolve(config.staticAssets.path)));
 app.use(favicon(`${__dirname}/../hosted/img/favicon.png`));
 app.use(compression());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -71,7 +68,7 @@ app.use(session({
   store: new RedisStore({
     client: redisClient,
   }),
-  secret: 'WOAH! My spare tire\'s gone!',
+  secret: config.secret,
   resave: true,
   saveUninitialized: true,
   cookie: {
@@ -95,9 +92,9 @@ app.use((err, req, res, next) => {
 // Don't start until the timeline directory has been loaded
 const start = (getTimelinePart) => {
   router(app, getTimelinePart);
-  app.listen(port, (err) => {
+  app.listen(config.connections.http.port, (err) => {
     if (err) throw err;
-    console.log(`Listening on port ${port}`);
+    console.log(`Listening on port ${config.connections.http.port}`);
   });
 };
 
