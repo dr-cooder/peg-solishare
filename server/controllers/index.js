@@ -2,6 +2,7 @@ const Game = require('../../client/Game.js');
 const {
   slotCount,
   isCode,
+  codeSampleRange,
   sampleCode,
 } = require('../../client/puzzle.js');
 const { byteToBits } = require('../../client/helpers.js');
@@ -44,7 +45,7 @@ const hint = async (req, res, getTimelinePart) => {
   // Separate potential hints (possible moves from the given code and their resulting codes)
   // by their samples
   const potentialHints = [];
-  for (let s = 0; s < 32; s++) {
+  for (let s = 0; s < codeSampleRange; s++) {
     potentialHints[s] = [];
   }
   for (let i = 0; i < nextMovesLen; i++) {

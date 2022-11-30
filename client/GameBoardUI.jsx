@@ -8,6 +8,7 @@ const {
   width,
   height,
   defaultCodeBase,
+  validateMoveStruct,
 } = require('./puzzle.js');
 
 class GameBoardUI extends Component {
@@ -27,8 +28,14 @@ class GameBoardUI extends Component {
 
     this.undo = (reverse) => {
       this.game.undo(reverse);
+      this.hintOnDisplay = null;
       this.props.onMove();
     };
+
+    this.hintOnDisplay = null;
+    this.displayHint = (hint) => {
+      if (validateMoveStruct(hint)) this.hintOnDisplay = hint;
+    }
   }
 
   static getDerivedStateFromProps(props, state) {
@@ -63,11 +70,14 @@ class GameBoardUI extends Component {
     for (let v = 0; v < height; v++) {
       const thisRow = [];
       const thisRowY = spaceHeight * (v + 0.5) + gridTop;
+      const thisRowTop = spaceHeight * v + gridTop;
       for (let u = 0; u < width; u++) {
         if (emptyBoardRef[v][u] !== 2) {
           thisRow[u] = {
             x: spaceWidth * (u + 0.5) + gridLeft,
             y: thisRowY,
+            left: spaceWidth * u + gridLeft,
+            top: thisRowTop
           };
         }
       }
@@ -110,10 +120,10 @@ class GameBoardUI extends Component {
     const pickUpBall = (e) => {
       if (this.state.disabled) return;
       updateMouseGrid(e);
-      if (this.game.puzzle[mouseGridY][mouseGridX] === 1) {
+      const clickedRow = this.game.puzzle[mouseGridY];
+      if (clickedRow && clickedRow[mouseGridX] === 1) {
         const thisSlot = slots[mouseGridY][mouseGridX];
-        if (thisSlot
-          && distanceNoSqrt(mouseX, mouseY, thisSlot.x, thisSlot.y) < ballRadiusSquared) {
+        if (distanceNoSqrt(mouseX, mouseY, thisSlot.x, thisSlot.y) < ballRadiusSquared) {
           this.setState({ holdingBall: true });
           tempMoveX = mouseGridX;
           tempMoveY = mouseGridY;
@@ -135,7 +145,10 @@ class GameBoardUI extends Component {
           y: mouseGridY,
         },
       };
-      if (this.game.makeMove(newMove)) this.props.onMove();
+      if (this.game.makeMove(newMove)) {
+        this.hintOnDisplay = null;
+        this.props.onMove();
+      }
     };
 
     canvasOuterEl.onmousedown = pickUpBall;
@@ -148,21 +161,21 @@ class GameBoardUI extends Component {
     canvasOuterEl.ontouchend = dropBall;
     canvasOuterEl.ontouchcancel = dropBall;
 
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = 'black';
-    ctx.fillStyle = 'black';
-
     const loop = () => {
       requestAnimationFrame(loop);
 
       ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
+      ctx.lineWidth = 3;
+      ctx.lineJoin = 'miter';
+      ctx.strokeStyle = 'black';
+      ctx.fillStyle = 'black';
       for (let v = 0; v < height; v++) {
         for (let u = 0; u < width; u++) {
           const thisSlot = slots[v][u];
           if (thisSlot) {
             ctx.beginPath();
-            ctx.rect(spaceWidth * u + gridLeft, spaceHeight * v + gridTop, spaceWidth, spaceHeight);
+            ctx.rect(thisSlot.left, thisSlot.top, spaceWidth, spaceHeight);
             ctx.closePath();
             ctx.stroke();
 
@@ -177,6 +190,26 @@ class GameBoardUI extends Component {
         }
       }
 
+      if (this.hintOnDisplay) {
+        ctx.lineWidth = 6;
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle = 'deepskyblue';
+
+        const thisHintFrom = this.hintOnDisplay.from;
+        const fromSlot = slots[thisHintFrom.y][thisHintFrom.x];
+        ctx.beginPath();
+        ctx.rect(fromSlot.left, fromSlot.top, spaceWidth, spaceHeight);
+        ctx.closePath();
+        ctx.stroke();
+
+        const thisHintTo = this.hintOnDisplay.to;
+        const toSlot = slots[thisHintTo.y][thisHintTo.x];
+        ctx.beginPath();
+        ctx.rect(toSlot.left, toSlot.top, spaceWidth, spaceHeight);
+        ctx.closePath();
+        ctx.stroke();
+      }
+
       if (this.state.holdingBall) {
         ctx.fillStyle = 'red';
 
@@ -184,11 +217,7 @@ class GameBoardUI extends Component {
         ctx.arc(mouseX, mouseY, ballRadius, 0, Math.PI * 2);
         ctx.closePath();
         ctx.fill();
-
-        ctx.fillStyle = 'black';
       }
-
-      ctx.beginPath();
     };
 
     loop();

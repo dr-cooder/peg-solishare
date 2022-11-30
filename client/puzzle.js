@@ -131,7 +131,7 @@ const isometries = [
     26, 19, 12,
   ],
 ];
-const isometryCount = 7;
+const isometryCount = isometries.length;
 const transform = (binCode, isometryNum) => {
   const isometry = isometries[isometryNum];
   let transformed = '';
@@ -264,11 +264,17 @@ const countBalls = (puzzle) => {
 };
 
 const codeSampleIndexes = [
+  // 4,
+  // 14, 16, 18,
+  // 28,
   4,
-  14, 16, 18,
+  8, 10,
+  14, 18,
+  22, 24,
   28,
 ];
 const codeSampleIndexCount = codeSampleIndexes.length;
+const codeSampleRange = 2 ** codeSampleIndexCount;
 const sampleCode = (binCode) => {
   let sampleBin = '';
   for (let i = 0; i < codeSampleIndexCount; i++) {
@@ -276,6 +282,9 @@ const sampleCode = (binCode) => {
   }
   return parseInt(sampleBin, 2);
 };
+
+const validateMoveStruct = (move) => move && move.from && typeof move.from.x === 'number' && typeof move.from.y === 'number'
+  && move.to && typeof move.to.x === 'number' && typeof move.from.y === 'number';
 
 module.exports = {
   emptyBoard,
@@ -295,5 +304,7 @@ module.exports = {
   isometryCount,
   codeImages,
   countBalls,
+  codeSampleRange,
   sampleCode,
+  validateMoveStruct,
 };
