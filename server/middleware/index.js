@@ -1,20 +1,22 @@
+// Only for debugging purposes
+const enableMiddleware = false;
+
 const requiresLogin = (req, res, next) => {
-  if (!req.session.account) {
-    return res.redirect('/');
+  if (enableMiddleware && req.session.account) {
+    return res.redirect('/login');
   }
   return next();
 };
 
 const requiresLogout = (req, res, next) => {
-  if (req.session.account) {
-    return res.redirect('/maker');
+  if (enableMiddleware && req.session.account) {
+    return res.redirect('/');
   }
-
   return next();
 };
 
 const requiresSecure = (req, res, next) => {
-  if (req.headers['x-forwarded-proto'] !== 'https') {
+  if (enableMiddleware && req.headers['x-forwarded-proto'] !== 'https') {
     return res.redirect(`https://${req.hostname}${req.url}`);
   }
   return next();
