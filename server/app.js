@@ -111,6 +111,7 @@ if (timelineDirectory && timelineUrlPattern) {
         if (!binId) return Buffer.from([]);
         const url = `${urlLeft}${binId}${urlRight}`;
         const partResponse = await fetch(url);
+        console.log(`received ${url}`);
         const partArrayBuffer = await partResponse.arrayBuffer();
         return Buffer.from(partArrayBuffer);
       });
