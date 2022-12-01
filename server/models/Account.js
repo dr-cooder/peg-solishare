@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
-const { codeRegExps, defaultCodeBase } = require('../../client/puzzle.js')
+const { codeRegExps, defaultCodeBase } = require('../../client/puzzle.js');
 
 const saltRounds = 10;
 
@@ -43,14 +43,13 @@ const AccountSchema = new mongoose.Schema({
         x: Number,
         y: Number,
       },
-    }
+    },
   }],
   completedPuzzles: [{
     type: String,
     trim: true,
-    unique: true,
     match: codeRegExps[defaultCodeBase],
-  }]
+  }],
 });
 
 AccountSchema.statics.toAPI = (doc) => ({
