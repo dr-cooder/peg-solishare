@@ -62,6 +62,16 @@ const validMoveDeltas = [
   },
 ];
 const validMoveDeltaCount = 4;
+const findMoveDelta = (fromX, fromY, toX, toY) => {
+  const deltaX = toX - fromX;
+  const deltaY = toY - fromY;
+  let matchingDelta = null;
+  for (let i = 0; i < validMoveDeltaCount; i++) {
+    const validDelta = validMoveDeltas[i];
+    if (validDelta.x === deltaX && validDelta.y === deltaY) matchingDelta = validDelta;
+  }
+  return matchingDelta;
+};
 
 // Meant to cull the size of the Sacred Timeline by culling puzzles that are the same but just
 // rotated/flipped, and considering all 8 possible rotations/flips when testing for matches.
@@ -293,6 +303,7 @@ module.exports = {
   slotCount,
   validMoveDeltas,
   validMoveDeltaCount,
+  findMoveDelta,
   codeRegExps,
   isCode,
   isPuzzle,

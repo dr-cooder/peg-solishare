@@ -14,6 +14,7 @@ const {
   defaultCodeBase,
   countBalls,
   validateMoveStruct,
+  findMoveDelta,
 } = require('./puzzle.js');
 
 class Game {
@@ -41,15 +42,9 @@ class Game {
     const fromY = move.from.y;
     const toX = move.to.x;
     const toY = move.to.y;
-    const deltaX = toX - fromX;
-    const deltaY = toY - fromY;
 
     // Delta between From and To must be 2 up, down, left, or right
-    let matchingDelta = null;
-    for (let i = 0; i < validMoveDeltaCount; i++) {
-      const validDelta = validMoveDeltas[i];
-      if (validDelta.x === deltaX && validDelta.y === deltaY) matchingDelta = validDelta;
-    }
+    const matchingDelta = findMoveDelta(fromX, fromY, toX, toY);
     if (!matchingDelta) return null;
     const matchingDeltaMiddle = matchingDelta.middle;
     const midX = fromX + matchingDeltaMiddle.x;

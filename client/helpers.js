@@ -31,6 +31,18 @@ const doneHavingStartedAt = (startTime) => {
   process.stdout.write(`\nDone after ${formatTime(timeTaken)}\n`);
 };
 
+const loadImage = (url) => new Promise((resolve, reject) => {
+  const img = new Image();
+  img.crossOrigin = 'Anonymous';
+  img.src = url;
+  img.onload = () => {
+    resolve(img);
+  };
+  img.onerror = (e) => {
+    reject(e);
+  };
+});
+
 module.exports = {
   distanceNoSqrt,
   byteToBits,
@@ -38,4 +50,5 @@ module.exports = {
   formatTime,
   progressPercent,
   doneHavingStartedAt,
+  loadImage,
 };
