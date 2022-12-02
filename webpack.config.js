@@ -4,6 +4,7 @@ module.exports = {
   entry: {
     play: './client/play.jsx',
     create: './client/create.jsx',
+    login: './client/login.jsx',
   },
   module: {
     rules: [

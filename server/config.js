@@ -28,6 +28,7 @@ const connections = {
 };
 
 module.exports = {
+  env: process.env.NODE_ENV,
   staticAssets: staticAssets[process.env.NODE_ENV],
   connections: connections[process.env.NODE_ENV],
   secret: process.env.SECRET,

@@ -43,6 +43,26 @@ const loadImage = (url) => new Promise((resolve, reject) => {
   };
 });
 
+const sendPost = async (url, data, handler) => {
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  const result = await response.json();
+
+  if (result.redirect) {
+    window.location = result.redirect;
+  }
+
+  if (handler) {
+    handler(result);
+  }
+};
+
 module.exports = {
   distanceNoSqrt,
   byteToBits,
@@ -51,4 +71,5 @@ module.exports = {
   progressPercent,
   doneHavingStartedAt,
   loadImage,
+  sendPost,
 };
