@@ -42,6 +42,7 @@ app.use(helmet({
         "'unsafe-inline'",
         'https://ajax.googleapis.com',
         'https://stackpath.bootstrapcdn.com',
+        'https://cdn.jsdelivr.net',
         'https://unpkg.com/',
       ],
       styleSrc: [
@@ -107,12 +108,13 @@ if (timelineDirectory && timelineUrlPattern) {
   fetch(timelineDirectory).then((response) => {
     response.json().then((json) => {
       start(async (count, sample) => {
-        const binId = json[`${count}-${sample}.bin`];
+        const binName = `${count}-${sample}.bin`;
+        const binId = json[binName];
         if (!binId) return Buffer.from([]);
         const url = `${urlLeft}${binId}${urlRight}`;
         const partResponse = await fetch(url);
-        console.log(`received ${url}`);
         const partArrayBuffer = await partResponse.arrayBuffer();
+        console.log(`Received timeline part ${binName} from ${url}`);
         return Buffer.from(partArrayBuffer);
       });
     }).catch((err) => {

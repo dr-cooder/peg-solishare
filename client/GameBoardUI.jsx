@@ -30,10 +30,13 @@ class GameBoardUI extends Component {
 
     this.code = (base = defaultCodeBase) => this.game.code(base);
 
-    this.undo = (reverse) => {
-      this.game.undo(reverse);
+    this.editMode = props.editMode;
+
+    this.onMove = props.onMove || (() => {});
+    this.undo = () => {
+      this.game.undo(this.editMode); // Any moves in the editor are in reverse
       this.hintOnDisplay = null;
-      this.props.onMove();
+      this.onMove();
     };
 
     this.hintOnDisplay = null;
@@ -134,22 +137,30 @@ class GameBoardUI extends Component {
 
     let tempMoveX = 0;
     let tempMoveY = 0;
-    const pickUpBall = (e) => {
+    const mouseDownHandler = (e) => {
       if (this.state.disabled) return;
       updateMouseGrid(e);
       const clickedRow = this.game.puzzle[mouseGridY];
-      if (clickedRow && clickedRow[mouseGridX] === 1) {
-        const thisSlot = slots[mouseGridY][mouseGridX];
-        if (distanceNoSqrt(mouseX, mouseY, thisSlot.x, thisSlot.y) < ballRadiusSquared) {
-          this.setState({ holdingBall: true });
-          tempMoveX = mouseGridX;
-          tempMoveY = mouseGridY;
+      if (clickedRow) {
+        const clickedSpaceValue = clickedRow[mouseGridX];
+        if (typeof clickedSpaceValue !== 'undefined') {
+          const thisSlot = slots[mouseGridY][mouseGridX];
+          if (distanceNoSqrt(mouseX, mouseY, thisSlot.x, thisSlot.y) < ballRadiusSquared) {
+            if (this.editMode === 'toggleBalls') {
+              this.game.toggleBall(mouseGridX, mouseGridY);
+            } else {
+              if (clickedSpaceValue === 1) {
+                this.setState({ holdingBall: true });
+                tempMoveX = mouseGridX;
+                tempMoveY = mouseGridY;
+              }
+            }
+          }
         }
       }
     };
-
-    const dropBall = (e) => {
-      if (this.state.disabled || !this.state.holdingBall) return;
+    const mouseUpHandler = (e) => {
+      if (this.state.disabled || !this.state.holdingBall || this.editMode === 'toggleBalls') return;
       this.setState({ holdingBall: false });
       updateMouseGrid(e);
       const newMove = {
@@ -162,21 +173,30 @@ class GameBoardUI extends Component {
           y: mouseGridY,
         },
       };
-      if (this.game.makeMove(newMove)) {
+      let moveMade;
+      if (this.editMode === 'solveReverse') {
+        moveMade = this.game.makeMove({
+          from: newMove.to,
+          to: newMove.from,
+        }, true);
+      } else {
+        moveMade = this.game.makeMove(newMove);
+      }
+      if (moveMade) {
         this.hintOnDisplay = null;
-        this.props.onMove();
+        this.onMove();
       }
     };
 
-    canvasOuterEl.onmousedown = pickUpBall;
+    canvasOuterEl.onmousedown = mouseDownHandler;
     canvasOuterEl.onmousemove = updateMouse;
-    canvasOuterEl.onmouseup = dropBall;
-    canvasOuterEl.onmouseout = dropBall;
+    canvasOuterEl.onmouseup = mouseUpHandler;
+    canvasOuterEl.onmouseout = mouseUpHandler;
 
-    canvasOuterEl.ontouchstart = pickUpBall;
+    canvasOuterEl.ontouchstart = mouseDownHandler;
     canvasOuterEl.ontouchmove = updateMouse;
-    canvasOuterEl.ontouchend = dropBall;
-    canvasOuterEl.ontouchcancel = dropBall;
+    canvasOuterEl.ontouchend = mouseUpHandler;
+    canvasOuterEl.ontouchcancel = mouseUpHandler;
 
     const loop = () => {
       requestAnimationFrame(loop);

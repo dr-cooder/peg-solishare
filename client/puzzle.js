@@ -170,7 +170,7 @@ const codeLength = (base) => fullBoardCodeInt.toString(base).length;
 const codeLengths = [];
 for (let i = 2; i <= 36; i++) codeLengths[i] = codeLength(i);
 const convertCodeBase = (code, from, to) => parseInt(code, from).toString(to).padStart(codeLengths[to], '0');
-const defaultCodeBase = 16;
+const defaultCodeBase = 36; // 16
 
 // These lengths can also be used to create a cache of RegExps which can be used to verify that
 // the passed-in code matches the format of the given code base
