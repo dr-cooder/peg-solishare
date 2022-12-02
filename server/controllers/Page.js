@@ -6,7 +6,7 @@ const play = (req, res) => res.render('play', {
   code: '000010001110001111101111111000000',
 });
 
-const login = (req, res) => res.render('login');
+const login = (req, res) => res.render('login', { csrfToken: req.csrfToken() });
 
 const create = (req, res) => res.render('create');
 

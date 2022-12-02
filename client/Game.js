@@ -141,8 +141,22 @@ class Game {
     return true;
   }
 
+  toggleBall(x, y, dontAddToHistory) {
+    const spaceOld = this.puzzle[y][x];
+    if (spaceOld === 2) return;
+    this.puzzle[y][x] = spaceOld === 0 ? 1 : 0;
+    if (!dontAddToHistory) this.moveHistory.push({ toggle: { x, y } });
+  }
+
   undo(reverse) {
-    this.makeMove(this.moveHistory.pop(), !reverse, true);
+    const moveToUndo = this.moveHistory.pop();
+    if (!moveToUndo) return;
+    const { toggle } = moveToUndo;
+    if (toggle) {
+      this.toggleBall(toggle.x, toggle.y, true);
+    } else {
+      this.makeMove(moveToUndo, !reverse, true);
+    }
   }
 
   countBalls() {

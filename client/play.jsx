@@ -6,6 +6,7 @@ const PlayUI = (props) => {
   const [undoHighlighted, setUndoHighlighted] = useState(false);
   const [hintWaiting, setHintWaiting] = useState(false);
   const [hintIsOnDisplay, setHintIsOnDisplay] = useState(false);
+  const [hintCount, setHintCount] = useState(5);
   const gameRef = createRef();
 
   const getHint = async (gameRefCurrent) => {
@@ -21,11 +22,15 @@ const PlayUI = (props) => {
     } else if (unsolvable) {
       setUndoHighlighted(true);
       setHintIsOnDisplay(true);
+      setHintCount(hintCount - 1);
+      if (hintCount < 0) setHintCount(0);
     } else if (alreadySolved) {
       setErrorMessage('This puzzle has already been solved!');
     } else if (hint) {
       gameRefCurrent.displayHint(hint);
       setHintIsOnDisplay(true);
+      setHintCount(hintCount - 1);
+      if (hintCount < 0) setHintCount(0);
     } else {
       setErrorMessage('Unexpected server response.');
     }
@@ -40,7 +45,7 @@ const PlayUI = (props) => {
   return (
     <>
       <GameBoardUI ref={gameRef} disabled={hintWaiting} basis={props.code} onMove={handleMove}/>
-      <div className="buttonContainerFlex">
+      <div className="buttonContainerFlex buttonContainerHoriz">
         <button id="hintButton" type="button" className="btn btn-warning btn-lg" disabled={hintIsOnDisplay || hintWaiting}
           onClick={() => {
             getHint(gameRef.current);
@@ -49,14 +54,15 @@ const PlayUI = (props) => {
               <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
               :
               <i className={hintIsOnDisplay ? `fa-solid fa-arrow-${undoHighlighted ? 'right' : 'up'}` : 'fa-regular fa-lightbulb'}></i>
-            } Hint
+            } Hints: {hintCount}
         </button>
         <button id="undoButton" type="button" className={`btn btn-secondary btn-lg ${undoHighlighted ? 'undoButtonHighlighted' : ''}`} disabled={hintWaiting}
-          onClick={() => {
-            gameRef.current.undo();
-          }}><i className="fa-solid fa-arrow-rotate-left"></i> Undo</button>
+          onClick={() => gameRef.current.undo()}><i className="fa-solid fa-arrow-rotate-left"></i> Undo</button>
       </div>
-      <h3>{errorMessage}</h3>
+      <div>
+        <a href="#" id="hintPurchaseLink" onClick={() => {setHintCount(hintCount + 5)}}>Buy more hints</a>
+      </div>
+      <h3 className="spacedHeader">{errorMessage}</h3>
     </>
   );
 }

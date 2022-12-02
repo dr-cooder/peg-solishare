@@ -3,6 +3,7 @@ const path = require('path');
 module.exports = {
   entry: {
     play: './client/play.jsx',
+    create: './client/create.jsx',
   },
   module: {
     rules: [
