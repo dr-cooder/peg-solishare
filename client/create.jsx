@@ -50,8 +50,8 @@ const CreateUI = () => {
 }
 
 const init = () => {
-  const createUiEl = document.getElementById('createUI');
-  ReactDOM.createRoot(createUiEl).render(<CreateUI/>);
+  const createUiRoot = ReactDOM.createRoot(document.getElementById('createUiRoot'));
+  createUiRoot.render(<CreateUI/>);
 }
 
 window.onload = init;

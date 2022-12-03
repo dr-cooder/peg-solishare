@@ -2,6 +2,7 @@ const path = require('path');
 
 module.exports = {
   entry: {
+    home: './client/home.jsx',
     play: './client/play.jsx',
     create: './client/create.jsx',
     login: './client/login.jsx',

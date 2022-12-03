@@ -23,10 +23,9 @@ In Peg SoliShare, players can play Peg Solitaire puzzles created by other player
 - https://stackoverflow.com/questions/17309749/node-js-console-log-is-it-possible-to-update-a-line-rather-than-create-a-new-l
 - https://webapps.stackexchange.com/questions/88769/get-share-link-of-multiple-files-in-google-drive-to-put-in-spreadsheet
 - https://www.techiedelight.com/bind-change-event-handler-radio-button-javascript/
+- https://stackoverflow.com/questions/6528876/how-to-redirect-404-errors-to-a-page-in-expressjs
 - Bootstrap documentation
 ### External Components
 - Bootstrap
 ## To-Do
-- User account functionality
-- Puzzle-creation UI similar to normal gameplay, only balls are either placed manually or generated from reverse-moves; after which it can be uploaded (after being verified as solvable of course)
-- After all of the above is done: online functionality ("Course World"); create and upload, or browse and play (rating system? keep track of high scores?) 
+- Online functionality (upload, browse, and play user-generated puzzles)

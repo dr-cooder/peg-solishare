@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - Peg SoliShare</title>
+  <title>Peg SoliShare</title>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
   <script src="/assets/loginBundle.js"></script>
@@ -15,11 +15,8 @@
 </head>
 <body>
   <div class="wrapper">
-    <h1>Peg SoliShare</h1>
-    <div id="loginContent"></div>
-    <button id="loginButton" class="btn btn-lg">Log in</button>
-    <button id="signupButton" class="btn btn-lg">Sign up</button>
-    <a href="/">Home</a>
+    <div id="navRoot" data-username={{username}}></div>
+    <div id="loginContentRoot" data-initial={{initial}}></div>
   </div>
 </body>
 </html>

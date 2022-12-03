@@ -1,4 +1,5 @@
 const { sendPost } = require('./helpers.js');
+const { renderNav } = require('./jsxHelpers.jsx');
 
 const helper = {
   hideError: () => {},
@@ -51,41 +52,61 @@ const handleSignup = (e) => {
 
 const LoginWindow = (props) => {
   return (
-    <form id="loginForm"
-      name="loginForm"
-      onSubmit={handleLogin}
-      action="/login"
-      method="POST"
-      className="mainForm"
-    >
-      <label htmlFor="username">Username: </label>
-      <input id="user" type="text" name="username" placeholder="username" />
-      <label htmlFor="pass">Password: </label>
-      <input id="pass" type="password" name="pass" placeholder="password" />
-      <input id="_csrf" type="hidden" name="_csrf" value={props.csrf} />
-      <input className="formSubmit" type="submit" value="Sign in" />
-    </form>
+    <>
+      <h1 className="loginTitle">Log in</h1>
+      <form id="loginForm"
+        name="loginForm"
+        onSubmit={handleLogin}
+        action="/login"
+        method="POST"
+        className="mainForm"
+      >
+        <div className="formTextboxes">
+          <label htmlFor="username">Username: </label>
+          <input id="user" type="text" name="username" placeholder="username" />
+          <label htmlFor="pass">Password: </label>
+          <input id="pass" type="password" name="pass" placeholder="password" />
+        </div>
+        <input id="_csrf" type="hidden" name="_csrf" value={props.csrf} />
+        <div className="buttonContainerFlex">
+          <input className="btn btn-primary btn-lg" type="submit" value="Log in" />
+        </div>
+        <div className="loginSignupSwitch">
+          Don't have an account? <a href="#" onClick={props.onSwitch}>Sign up</a>
+        </div>
+      </form>
+    </>
   );
 };
 
 const SignupWindow = (props) => {
   return (
-    <form id="signupForm"
-      name="signupForm"
-      onSubmit={handleSignup}
-      action="/signup"
-      method="POST"
-      className="mainForm"
-    >
-      <label htmlFor="username">Username: </label>
-      <input id="user" type="text" name="username" placeholder="username" />
-      <label htmlFor="pass">Password: </label>
-      <input id="pass" type="password" name="pass" placeholder="password" />
-      <label htmlFor="pass2">Password: </label>
-      <input id="pass2" type="password" name="pass2" placeholder="retype password" />
-      <input id="_csrf" type="hidden" name="_csrf" value={props.csrf} />
-      <input className="formSubmit" type="submit" value="Sign up" />
-    </form>
+    <>
+      <h1 className="loginTitle">Sign up</h1>
+      <form id="signupForm"
+        name="signupForm"
+        onSubmit={handleSignup}
+        action="/signup"
+        method="POST"
+        className="mainForm"
+      >
+        <div className="formTextboxes">
+          <label htmlFor="username">Username: </label>
+          <input id="user" type="text" name="username" placeholder="username" />
+          <label htmlFor="pass">Password: </label>
+          <input id="pass" type="password" name="pass" placeholder="password" />
+          <label htmlFor="pass2">Retype password: </label>
+          <input id="pass2" type="password" name="pass2" placeholder="retype password" />
+        </div>
+        <input id="_csrf" type="hidden" name="_csrf" value={props.csrf} />
+        <div className="buttonContainerFlex">
+          <input className="btn btn-primary btn-lg" type="submit" value="Sign up" />
+        </div>
+        <div className="loginSignupSwitch">
+          Already have an account? <a href="#" onClick={props.onSwitch}>Log in</a>
+        </div>
+      </form>
+    </>
   );
 };
 
@@ -93,23 +114,23 @@ const init = async () => {
   const response = await fetch('/token');
   const data = await response.json();
 
-  const loginButton = document.getElementById('loginButton');
-  const signupButton = document.getElementById('signupButton');
-  const loginContentRoot = ReactDOM.createRoot(document.getElementById('loginContent'));
+  renderNav(false, true);
 
-  loginButton.addEventListener('click', (e) => {
-    e.preventDefault();
-    loginContentRoot.render(<LoginWindow csrf={data.csrfToken} />);
-    return false;
-  });
+  const loginContentRootEl = document.getElementById('loginContentRoot');
+  const { initial } = loginContentRootEl.dataset;
+  const loginContentRoot = ReactDOM.createRoot(loginContentRootEl);
 
-  signupButton.addEventListener('click', (e) => {
-    e.preventDefault();
-    loginContentRoot.render(<SignupWindow csrf={data.csrfToken} />);
-    return false;
-  });
+  const showWindow = (signup) => {
+    if (signup) {
+      document.title = 'Sign up - Peg SoliShare';
+      loginContentRoot.render(<SignupWindow csrf={data.csrfToken} onSwitch={() => showWindow(false)}/>);
+    } else {
+      document.title = 'Login - Peg SoliShare';
+      loginContentRoot.render(<LoginWindow csrf={data.csrfToken} onSwitch={() => showWindow(true)}/>);
+    }
+  }
 
-  loginContentRoot.render(<LoginWindow csrf={data.csrfToken} />);
+  showWindow(initial === 'signup');
 };
 
 window.onload = init;

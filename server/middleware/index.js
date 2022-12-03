@@ -5,7 +5,6 @@ const enableMiddleware = true;
 
 const requiresLogin = (req, res, next) => {
   if (enableMiddleware && !req.session.account) {
-    console.log('not logged in!');
     return res.redirect('/login');
   }
   return next();
@@ -13,7 +12,6 @@ const requiresLogin = (req, res, next) => {
 
 const requiresLogout = (req, res, next) => {
   if (enableMiddleware && req.session.account) {
-    console.log('logged in!');
     return res.redirect('/');
   }
   return next();
@@ -29,8 +27,6 @@ const requiresSecure = (req, res, next) => {
 const bypassSecure = (req, res, next) => {
   next();
 };
-
-console.log(config.env);
 
 module.exports = {
   requiresLogin,
