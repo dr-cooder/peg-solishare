@@ -1,15 +1,16 @@
 const GameBoardUI = require('./GameBoardUI.jsx');
-const { useState, createRef } = React;
+const ErrorMessage = require('./ErrorMessage.jsx');
+const { useState, createRef, useRef } = React;
 
 const PlayUI = (props) => {
-  const [errorMessage, setErrorMessage] = useState();
   const [undoHighlighted, setUndoHighlighted] = useState(false);
   const [hintWaiting, setHintWaiting] = useState(false);
   const [hintIsOnDisplay, setHintIsOnDisplay] = useState(false);
   const [hintCount, setHintCount] = useState(5);
   const gameRef = createRef();
+  const errorMessageRef = useRef();
 
-  const getHint = async (gameRefCurrent) => {
+  const getHint = async (gameRefCurrent, errorMessageRefCurrent) => {
     const code = gameRefCurrent.code();
     if (hintWaiting) return null;
     setHintWaiting(true);
@@ -18,38 +19,38 @@ const PlayUI = (props) => {
     const { hint, unsolvable, alreadySolved, message } = await response.json();
     setHintWaiting(false);
     if (response.status !== 200) {
-      setErrorMessage(message)
+      errorMessageRefCurrent.showError(message);
     } else if (unsolvable) {
       setUndoHighlighted(true);
       setHintIsOnDisplay(true);
       setHintCount(hintCount - 1);
       if (hintCount < 0) setHintCount(0);
+      errorMessageRefCurrent.clearMessage();
     } else if (alreadySolved) {
-      setErrorMessage('This puzzle has already been solved!');
+      errorMessageRefCurrent.showError('This puzzle has already been solved!');
     } else if (hint) {
       gameRefCurrent.displayHint(hint);
       setHintIsOnDisplay(true);
       setHintCount(hintCount - 1);
       if (hintCount < 0) setHintCount(0);
+      errorMessageRefCurrent.clearMessage();
     } else {
-      setErrorMessage('Unexpected server response.');
+      errorMessageRefCurrent.showError('Unexpected server response.');
     }
   }
 
-  const handleMove = () => {
-    setErrorMessage('');
+  const handleMove = (errorMessageRefCurrent) => {
+    errorMessageRefCurrent.clearMessage();
     setUndoHighlighted(false);
     setHintIsOnDisplay(false);
   }
 
   return (
     <>
-      <GameBoardUI ref={gameRef} disabled={hintWaiting} basis={props.code} onMove={handleMove}/>
+      <GameBoardUI ref={gameRef} disabled={hintWaiting} basis={props.code} onMove={() => handleMove(errorMessageRef.current)}/>
       <div className="buttonContainerFlex buttonContainerHoriz">
         <button id="hintButton" type="button" className="btn btn-warning btn-lg" disabled={hintIsOnDisplay || hintWaiting}
-          onClick={() => {
-            getHint(gameRef.current);
-          }}>
+          onClick={() => getHint(gameRef.current, errorMessageRef.current)}>
             {hintWaiting ?
               <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
               :
@@ -62,7 +63,7 @@ const PlayUI = (props) => {
       <div>
         <a href="#" id="hintPurchaseLink" onClick={() => {setHintCount(hintCount + 5)}}>Buy more hints</a>
       </div>
-      <h3 className="spacedHeader">{errorMessage}</h3>
+      <ErrorMessage ref={errorMessageRef}/>
     </>
   );
 }

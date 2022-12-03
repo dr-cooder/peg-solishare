@@ -143,9 +143,10 @@ class Game {
 
   toggleBall(x, y, dontAddToHistory) {
     const spaceOld = this.puzzle[y][x];
-    if (spaceOld === 2) return;
+    if (spaceOld === 2) return false;
     this.puzzle[y][x] = spaceOld === 0 ? 1 : 0;
     if (!dontAddToHistory) this.moveHistory.push({ toggle: { x, y } });
+    return true;
   }
 
   undo(reverse) {

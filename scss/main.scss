@@ -76,6 +76,12 @@ body, .wrapper {
   align-items: center;
 }
 
+.errorMessageContainer {
+  min-height: 4.25rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
 .formTextboxes {
   display: grid;
   width: max-content;

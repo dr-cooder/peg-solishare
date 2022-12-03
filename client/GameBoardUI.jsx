@@ -147,7 +147,7 @@ class GameBoardUI extends Component {
           const thisSlot = slots[mouseGridY][mouseGridX];
           if (distanceNoSqrt(mouseX, mouseY, thisSlot.x, thisSlot.y) < ballRadiusSquared) {
             if (this.editMode === 'toggleBalls') {
-              this.game.toggleBall(mouseGridX, mouseGridY);
+              if (this.game.toggleBall(mouseGridX, mouseGridY)) this.onMove();
             } else {
               if (clickedSpaceValue === 1) {
                 this.setState({ holdingBall: true });
