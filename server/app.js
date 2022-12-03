@@ -49,6 +49,7 @@ app.use(helmet({
         "'self'",
         'https://cdn.jsdelivr.net',
         'https://cdnjs.cloudflare.com',
+        'https://fonts.googleapis.com/',
       ],
       imgSrc: ['*', 'data:'],
       connectSrc: ["'self'"],

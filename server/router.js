@@ -19,6 +19,9 @@ const router = (app, getTimelinePart) => {
   app.get('/account', mid.requiresLogin, controllers.Page.accountSettings);
 
   app.get('/hint', mid.requiresLogin, (req, res) => controllers.Puzzle.hint(req, res, getTimelinePart));
+
+  // https://stackoverflow.com/questions/6528876/how-to-redirect-404-errors-to-a-page-in-expressjs
+  app.get('*', controllers.Page.notFound);
 };
 
 module.exports = router;

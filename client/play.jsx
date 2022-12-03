@@ -68,8 +68,9 @@ const PlayUI = (props) => {
 }
 
 const init = () => {
-  const playUiEl = document.getElementById('playUI');
-  ReactDOM.createRoot(playUiEl).render(<PlayUI code={playUiEl.dataset.code} />);
+  const playUiRootEl = document.getElementById('playUiRoot');
+  const playUiRoot = ReactDOM.createRoot(playUiRootEl);
+  playUiRoot.render(<PlayUI code={playUiRootEl.dataset.code} />);
 }
 
 window.onload = init;

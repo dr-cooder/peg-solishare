@@ -1,4 +1,106 @@
-.playTitle, .playCreator, .createTitle {
+@import url('https://fonts.googleapis.com/css2?family=Squada+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lobster&display=swap');
+
+.logo {
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+.logoHero {
+  font-size: 8rem;
+}
+
+.logoLink {
+  text-decoration: none;
+  font-size: 1.5rem;
+}
+
+.logoPegSoli {
+  font-family: 'Squada One', sans-serif;
+  font-size: 112.5%;
+}
+
+.logoShare {
+  font-family: 'Lobster', cursive, sans-serif;
+}
+
+body, a, .logoLink, .logoLink:hover {
+  color: white;
+}
+
+a:hover {
+  color: #ccc;
+}
+
+body, .wrapper {
+  background-color: #555;
+}
+
+.wrapper {
+  min-height: 100vh;
+}
+
+.bgHero {
+  background-image: url('./img/hero.jpg');
+  background-attachment: fixed;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  display: flex;
+  flex-direction: column;
+}
+
+.heroContent {
+  flex-basis: 0;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#navRoot {
+  height: 3rem;
+  background-color: #444;
+}
+
+.welcomeUsername {
+  font-weight: bold;
+}
+
+.navFlex {
+  height: inherit;
+  padding: 0 3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.formTextboxes {
+  display: grid;
+  width: max-content;
+  grid-template-columns: 13rem 13rem;
+  gap: 1rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+}
+
+.formTextboxes > label {
+  margin: auto 0;
+  text-align: right;
+}
+
+#loginContentRoot, #loginForm > *, #signupForm > * {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.loginSignupSwitch {
+  text-align: center;
+}
+
+.playTitle, .playCreator, .createTitle, .loginTitle {
   text-align: center;
 }
 
@@ -11,7 +113,7 @@
   margin-top: 0.5rem;
 }
 
-#playUI > *, #createUI > * {
+#playUiRoot > *, #createUiRoot > * {
   text-align: center;
   margin-left: auto;
   margin-right: auto;
