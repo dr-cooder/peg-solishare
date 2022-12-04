@@ -54,7 +54,7 @@ const LoginWindow = (props) => {
 
   return (
     <>
-      <h1 className="loginTitle">Log in</h1>
+      <h1 className="spacedHeader">Log in</h1>
       <form id="loginForm"
         name="loginForm"
         onSubmit={(e) => handleLogin(e, errorMessageRef.current)}
@@ -86,7 +86,7 @@ const SignupWindow = (props) => {
 
   return (
     <>
-      <h1 className="loginTitle">Sign up</h1>
+      <h1 className="spacedHeader">Sign up</h1>
       <form id="signupForm"
         name="signupForm"
         onSubmit={(e) => handleSignup(e, errorMessageRef.current)}

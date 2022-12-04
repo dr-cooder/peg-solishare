@@ -5,13 +5,13 @@ const HeroButtons = (props) => {
     <>
       {props.signedIn ?
         <div className={'buttonContainerFlex buttonContainerHoriz'}>
-          <a href="/explore" className="btn btn-success btn-lg"><i className="fa-solid fa-puzzle-piece"></i> Play</a>
-          <a href="/create" className="btn btn-warning btn-lg"><i className="fa-solid fa-pen-to-square"></i> Create</a>
+          <a href="/explore" className="btn btn-success btn-xl"><i className="fa-solid fa-puzzle-piece"></i> Play</a>
+          <a href="/create" className="btn btn-warning btn-xl"><i className="fa-solid fa-pen-to-square"></i> Create</a>
         </div>
         :
         <>
           <div className="buttonContainerFlex">
-            <a href="/login?signup" className="btn btn-primary btn-lg">Get started</a>
+            <a href="/login?signup" className="btn btn-primary btn-xl">Get started</a>
           </div>
           <div className="loginSignupSwitch">
             Already have an account? <a href="/login">Log in</a>

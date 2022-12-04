@@ -23,7 +23,7 @@ const login = (req, res) => res.render('login', {
 
 const create = (req, res) => res.render('create');
 
-const explore = (req, res) => res.render('explore');
+const explore = (req, res) => res.render('explore', { username: getAccount(req).username });
 
 const accountSettings = (req, res) => res.render('accountSettings');
 

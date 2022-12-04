@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const _ = require('underscore');
 const { codeRegExps, defaultCodeBase } = require('../../client/puzzle.js');
-const { Account } = require('.');
+// const { Account } = require('.');
 
 let PuzzleModel = {};
 
@@ -13,6 +13,12 @@ const PuzzleSchema = new mongoose.Schema({
     required: true,
     trim: true,
     set: setTitle,
+  },
+  creatorName: {
+    type: String,
+    required: true,
+    trim: true,
+    match: /^[A-Za-z0-9_\-.]{1,16}$/,
   },
   creatorId: {
     type: mongoose.Schema.ObjectId,
@@ -31,26 +37,24 @@ const PuzzleSchema = new mongoose.Schema({
   },
 });
 
-PuzzleSchema.statics.toAPI = async (doc) => {
-  const account = await Account.findById(doc.creatorId);
-  return {
-    title: doc.title,
-    creatorName: account.name,
-    creatorId: doc.creatorId,
-    createdDate: doc.createdDate,
-    code: doc.code,
-  };
-};
+PuzzleSchema.statics.toAPI = (doc) => ({
+  title: doc.title,
+  creatorName: doc.creatorName,
+  creatorId: doc.creatorId,
+  createdDate: doc.createdDate,
+  code: doc.code,
+});
 
-PuzzleSchema.statics.findByCodeAndCreator = async (code, username, callback) => {
-  const { _id } = await Account.find({ username });
+PuzzleSchema.statics.findByCodeAndCreator = (code, username, callback) => {
   const search = {
-    creatorId: mongoose.Types.ObjectId(_id),
+    creatorName: username,
     code,
   };
 
-  return PuzzleModel.find(search).select('title code').lean().exec(callback);
+  return PuzzleModel.find(search).select('title createdDate').lean().exec(callback);
 };
+
+PuzzleSchema.statics.getAll = (callback) => PuzzleModel.find({}).select('title creatorName creatorId createdDate code').lean().exec(callback);
 
 PuzzleModel = mongoose.model('Puzzle', PuzzleSchema);
 

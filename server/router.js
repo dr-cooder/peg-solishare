@@ -23,8 +23,11 @@ const router = (app, getTimelinePart) => {
 
   app.post('/upload', mid.requiresSecure, mid.requiresLogin, (req, res) => controllers.Puzzle.upload(req, res, getTimelinePart));
 
+  app.get('/get-puzzles', mid.requiresLogin, controllers.Puzzle.getPuzzles);
+
   // https://stackoverflow.com/questions/6528876/how-to-redirect-404-errors-to-a-page-in-expressjs
   app.get('*', controllers.Page.notFound);
+  app.post('*', controllers.Page.notFound);
 };
 
 module.exports = router;
