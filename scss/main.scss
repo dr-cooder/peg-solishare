@@ -33,7 +33,7 @@ a:hover {
 }
 
 body, .wrapper {
-  background-color: #555;
+  background: linear-gradient(to bottom right, #555, #333) fixed;
 }
 
 .wrapper {
@@ -85,6 +85,7 @@ body, .wrapper {
   min-height: 4.25rem;
   margin-top: 1rem;
   margin-bottom: 1rem;
+  text-align: center;
 }
 
 .formTextboxes {
@@ -102,7 +103,7 @@ body, .wrapper {
   text-align: right;
 }
 
-#loginContentRoot, #loginForm > *, #signupForm > *, #heroBtnRoot > * {
+#loginContentRoot > *, #loginForm > *, #signupForm > *, #heroBtnRoot > * {
   margin-left: auto;
   margin-right: auto;
 }
