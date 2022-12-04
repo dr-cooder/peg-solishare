@@ -9,6 +9,7 @@ const handleLogin = async (e, errMessage) => {
 
   const username = e.target.querySelector('#user').value;
   const pass = e.target.querySelector('#pass').value;
+  const next = e.target.querySelector('#next').value;
   const _csrf = e.target.querySelector('#_csrf').value;
 
   if (!username || !pass) {
@@ -16,7 +17,7 @@ const handleLogin = async (e, errMessage) => {
     return false;
   }
 
-  const { error } = await sendPost(e.target.action, { username, pass, _csrf });
+  const { error } = await sendPost(e.target.action, { username, pass, next, _csrf });
   if (error) errMessage.showError(error);
 
   return false;
@@ -29,6 +30,7 @@ const handleSignup = async (e, errMessage) => {
   const username = e.target.querySelector('#user').value;
   const pass = e.target.querySelector('#pass').value;
   const pass2 = e.target.querySelector('#pass2').value;
+  const next = e.target.querySelector('#next').value;
   const _csrf = e.target.querySelector('#_csrf').value;
 
   if (!username || !pass || !pass2) {
@@ -42,7 +44,7 @@ const handleSignup = async (e, errMessage) => {
   }
 
   const { error } = await sendPost(e.target.action, {
-    username, pass, pass2, _csrf,
+    username, pass, pass2, next, _csrf,
   });
   if (error) errMessage.showError(error);
 
@@ -69,6 +71,7 @@ const LoginWindow = (props) => {
           <input id="pass" type="password" name="pass" placeholder="password" />
         </div>
         <input id="_csrf" type="hidden" name="_csrf" value={props.csrf} />
+        <input id="next" type="hidden" name="next" value={props.next} />
         <div className="buttonContainerFlex">
           <input className="btn btn-primary btn-lg" type="submit" value="Log in" />
         </div>
@@ -103,6 +106,7 @@ const SignupWindow = (props) => {
           <input id="pass2" type="password" name="pass2" placeholder="retype password" />
         </div>
         <input id="_csrf" type="hidden" name="_csrf" value={props.csrf} />
+        <input id="next" type="hidden" name="next" value={props.next} />
         <div className="buttonContainerFlex">
           <input className="btn btn-primary btn-lg" type="submit" value="Sign up" />
         </div>
@@ -122,16 +126,16 @@ const init = async () => {
   renderNav(false, true);
 
   const loginContentRootEl = document.getElementById('loginContentRoot');
-  const { initial } = loginContentRootEl.dataset;
+  const { next, initial } = loginContentRootEl.dataset;
   const loginContentRoot = ReactDOM.createRoot(loginContentRootEl);
 
   const showWindow = (signup) => {
     if (signup) {
       document.title = 'Sign up - Peg SoliShare';
-      loginContentRoot.render(<SignupWindow csrf={data.csrfToken} onSwitch={() => showWindow(false)}/>);
+      loginContentRoot.render(<SignupWindow csrf={data.csrfToken} onSwitch={() => showWindow(false)} next={next} />);
     } else {
       document.title = 'Login - Peg SoliShare';
-      loginContentRoot.render(<LoginWindow csrf={data.csrfToken} onSwitch={() => showWindow(true)}/>);
+      loginContentRoot.render(<LoginWindow csrf={data.csrfToken} onSwitch={() => showWindow(true)} next={next} />);
     }
   }
 

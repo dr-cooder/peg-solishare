@@ -10,7 +10,7 @@ const Nav = (props) => {
       : null}</div>
       <div>{!dontShowLogin ? 
         (username ?
-          <>Welcome, <span className="welcomeUsername">{username}</span> | <a href="/logout">Log out</a></>
+          <>Welcome, <span className="welcomeUsername">{username}</span> | <a href="/account">Settings</a> | <a href="/logout">Log out</a></>
           :
           <><a className="btn btn-primary" href="/login?signup">Sign up</a> or <a href="/login">log in</a></>
         )

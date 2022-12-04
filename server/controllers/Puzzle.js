@@ -18,7 +18,11 @@ const upload = async (req, res, getTimelinePart) => {
 
   const { title, code } = req.body;
   if (!title || !code) {
-    return res.status(400).json({ error: 'Puzzle title and code are required!' });
+    // 'Puzzle title and code are required!'
+    // ^ Should technically be this but players never directly interface with puzzle code
+    // and we don't want to make them think they need to submit anything beyond a
+    // WYSIWYG puzzle and its title
+    return res.status(400).json({ error: 'Puzzle title is required!' });
   }
 
   const puzzleData = {
