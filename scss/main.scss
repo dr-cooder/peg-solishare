@@ -64,6 +64,11 @@ body, .wrapper {
   background-color: #444;
 }
 
+#heroBtnRoot {
+  margin-top: 2rem;
+  min-height: 5rem;
+}
+
 .welcomeUsername {
   font-weight: bold;
 }
@@ -97,7 +102,7 @@ body, .wrapper {
   text-align: right;
 }
 
-#loginContentRoot, #loginForm > *, #signupForm > * {
+#loginContentRoot, #loginForm > *, #signupForm > *, #heroBtnRoot > * {
   margin-left: auto;
   margin-right: auto;
 }
@@ -155,7 +160,7 @@ body, .wrapper {
   max-width: max-content;
 }
 
-.buttonContainerHoriz > button {
+.buttonContainerHoriz > .btn {
   width: 9rem;
 }
 

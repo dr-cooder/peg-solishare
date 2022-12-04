@@ -72,7 +72,7 @@ const hint = async (req, res, getTimelinePart) => {
   // Otherise make sure charging them is within the realm of possibility
   if (account.hintBalance - 1 < 0) {
     return res.status(401).json({
-      message: 'You can\'t afford any more hints.',
+      message: 'You are out of hints.',
       id: 'insufficientHintBalance',
     });
   }
