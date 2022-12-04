@@ -1,32 +1,30 @@
 const { sendPost } = require('./helpers.js');
 const { renderNav } = require('./jsxHelpers.jsx');
+const { createRef } = React;
+const ErrorMessage = require('./ErrorMessage.jsx');
 
-const helper = {
-  hideError: () => {},
-  handleError: (e) => console.log(e),
-};
-
-const handleLogin = (e) => {
+const handleLogin = async (e, errMessage) => {
   e.preventDefault();
-  helper.hideError();
+  errMessage.clearMessage();
 
   const username = e.target.querySelector('#user').value;
   const pass = e.target.querySelector('#pass').value;
   const _csrf = e.target.querySelector('#_csrf').value;
 
   if (!username || !pass) {
-    helper.handleError('Username or password is empty!');
+    errMessage.showError('Username or password is empty!');
     return false;
   }
 
-  sendPost(e.target.action, { username, pass, _csrf });
+  const { error } = await sendPost(e.target.action, { username, pass, _csrf });
+  if (error) errMessage.showError(error);
 
   return false;
 };
 
-const handleSignup = (e) => {
+const handleSignup = async (e, errMessage) => {
   e.preventDefault();
-  helper.hideError();
+  errMessage.clearMessage();
 
   const username = e.target.querySelector('#user').value;
   const pass = e.target.querySelector('#pass').value;
@@ -34,29 +32,32 @@ const handleSignup = (e) => {
   const _csrf = e.target.querySelector('#_csrf').value;
 
   if (!username || !pass || !pass2) {
-    helper.handleError('All fields are required!');
+    errMessage.showError('All fields are required!');
     return false;
   }
 
   if (pass !== pass2) {
-    helper.handleError('Passwords do not match!');
+    errMessage.showError('Passwords do not match!');
     return false;
   }
 
-  sendPost(e.target.action, {
+  const { error } = await sendPost(e.target.action, {
     username, pass, pass2, _csrf,
   });
+  if (error) errMessage.showError(error);
 
   return false;
 };
 
 const LoginWindow = (props) => {
+  const errorMessageRef = createRef();
+
   return (
     <>
       <h1 className="loginTitle">Log in</h1>
       <form id="loginForm"
         name="loginForm"
-        onSubmit={handleLogin}
+        onSubmit={(e) => handleLogin(e, errorMessageRef.current)}
         action="/login"
         method="POST"
         className="mainForm"
@@ -75,17 +76,20 @@ const LoginWindow = (props) => {
           Don't have an account? <a href="#" onClick={props.onSwitch}>Sign up</a>
         </div>
       </form>
+      <ErrorMessage ref={errorMessageRef}/>
     </>
   );
 };
 
 const SignupWindow = (props) => {
+  const errorMessageRef = createRef();
+
   return (
     <>
       <h1 className="loginTitle">Sign up</h1>
       <form id="signupForm"
         name="signupForm"
-        onSubmit={handleSignup}
+        onSubmit={(e) => handleSignup(e, errorMessageRef.current)}
         action="/signup"
         method="POST"
         className="mainForm"
@@ -106,6 +110,7 @@ const SignupWindow = (props) => {
           Already have an account? <a href="#" onClick={props.onSwitch}>Log in</a>
         </div>
       </form>
+      <ErrorMessage ref={errorMessageRef}/>
     </>
   );
 };

@@ -17,11 +17,11 @@ const PlayUI = (props) => {
     if (hintWaiting || buyHintWaiting) return null;
     setHintWaiting(true);
     const response = await fetch(`/hint?code=${code}`);
-    const { hint, unsolvable, alreadySolved, message, updatedBalance } = await response.json();
+    const { hint, unsolvable, alreadySolved, error, updatedBalance } = await response.json();
     if (typeof updatedBalance === 'number') setHintCount(updatedBalance);
     setHintWaiting(false);
     if (response.status !== 200) {
-      errorMessageRefCurrent.showError(message);
+      errorMessageRefCurrent.showError(error);
     } else if (unsolvable) {
       setUndoHighlighted(true);
       setHintIsOnDisplay(true);

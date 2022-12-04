@@ -7,27 +7,90 @@ const {
 } = require('../../client/puzzle.js');
 const { byteToBits } = require('../../client/helpers.js');
 const { getAccount } = require('./controllerHelpers.js');
-const { Account } = require('../models');
+const { Account, Puzzle } = require('../models');
+
+const upload = async (req, res, getTimelinePart) => {
+  const { _id } = getAccount(req);
+  const account = await Account.findById(_id);
+  if (!account) {
+    return res.status(401).json({ error: 'You must be signed in to upload a puzzle.' });
+  }
+
+  const { title, code } = req.body;
+  if (!title || !code) {
+    return res.status(400).json({ error: 'Puzzle title and code are required!' });
+  }
+
+  const puzzleData = {
+    title,
+    creatorId: _id,
+    code,
+  };
+
+  // Ensure the code is valid
+  if (!isCode(code)) {
+    return res.status(400).json({ error: `"${code}" is not a valid puzzle code.` });
+  }
+  const game = new Game(code);
+
+  // Ensure the ball count is valid
+  const ballCount = game.countBalls();
+  if (ballCount === 0) {
+    return res.status(400).json({ error: 'This puzzle is empty!' });
+  }
+  if (ballCount === 1) {
+    return res.status(400).json({ error: 'This puzzle is already in a solved state!' });
+  }
+
+  // Check to see if the puzzle is solvable
+  const binCode = game.code(2);
+  const codeSample = sampleCode(binCode);
+  const buf = await getTimelinePart(ballCount, codeSample);
+  let bitQueue = '';
+  let matchFound = false;
+  for (let k = 0; k < buf.byteLength; k++) {
+    bitQueue += byteToBits(buf[k]);
+    while (bitQueue.length >= slotCount && !matchFound) {
+      const solvableCode = bitQueue.slice(0, slotCount);
+      bitQueue = bitQueue.slice(slotCount);
+      if (solvableCode === binCode) {
+        matchFound = true;
+      }
+    }
+    if (matchFound) break;
+  }
+  if (!matchFound) return res.status(400).json({ error: 'This puzzle has no solution(s)!' });
+
+  // Validation on this server is done, now it's up to MongoDB
+  try {
+    const newPuzzle = new Puzzle(puzzleData);
+    await newPuzzle.save();
+    return res.status(201).json({
+      title: newPuzzle.title,
+      code: newPuzzle.code,
+    });
+  } catch (err) {
+    console.log(err);
+    if (err.code === 11000) {
+      return res.status(400).json({ error: 'Puzzle already exists!' });
+    }
+    return res.status(400).json({ error: 'An error occurred.' });
+  }
+};
 
 const hint = async (req, res, getTimelinePart) => {
   // Ensure the user is signed in with an account that can afford a hint
   const { _id } = getAccount(req);
   const account = await Account.findById(_id);
   if (!account) {
-    return res.status(401).json({
-      message: 'You must be signed in to request a hint.',
-      id: 'hintWithoutSignIn',
-    });
+    return res.status(401).json({ error: 'You must be signed in to request a hint.' });
   }
 
   const { code } = req.query;
 
   // Confirm the input is valid first
   if (!isCode(code)) {
-    return res.status(400).json({
-      message: `"${code}" is not a valid puzzle code.`,
-      id: 'invalidCode',
-    });
+    return res.status(400).json({ error: `"${code}" is not a valid puzzle code.` });
   }
   const game = new Game(code);
   const ballCount = game.countBalls();
@@ -71,10 +134,7 @@ const hint = async (req, res, getTimelinePart) => {
 
   // Otherise make sure charging them is within the realm of possibility
   if (account.hintBalance - 1 < 0) {
-    return res.status(401).json({
-      message: 'You are out of hints.',
-      id: 'insufficientHintBalance',
-    });
+    return res.status(401).json({ error: 'You are out of hints.' });
   }
 
   // Find all possible subsequent moves from given game
@@ -125,10 +185,7 @@ const hint = async (req, res, getTimelinePart) => {
   try {
     cachePartBufs = await Promise.all(cachePartPromises);
   } catch (err) {
-    return res.status(500).json({
-      message: 'Unable to access hint data.',
-      id: 'hintDataAccessProblem',
-    });
+    return res.status(500).json({ error: 'Unable to access hint data.' });
   }
 
   let bitQueue;
@@ -172,5 +229,6 @@ const hint = async (req, res, getTimelinePart) => {
 };
 
 module.exports = {
+  upload,
   hint,
 };

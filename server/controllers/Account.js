@@ -16,7 +16,7 @@ const login = (req, res) => {
 
   return Account.authenticate(username, pass, (err, account) => {
     if (err || !account) {
-      return res.status(401).json({ error: 'Wrong username or password!' });
+      return res.status(401).json({ error: 'Wrong username or password! (they are cAse-sENsItiVE)' });
     }
 
     req.session.account = Account.toAPI(account);
