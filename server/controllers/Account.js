@@ -1,6 +1,5 @@
-const models = require('../models');
-
-const { Account } = models;
+const { getAccount } = require('./controllerHelpers.js');
+const { Account } = require('../models');
 
 const logout = (req, res) => {
   req.session.destroy();
@@ -54,11 +53,28 @@ const signup = async (req, res) => {
   }
 };
 
+const buyHints = async (req, res) => {
+  const { _id } = getAccount(req);
+  const account = await Account.findById(_id);
+  if (!account) {
+    return res.status(401).json({
+      message: 'You must be signed in to buy hints.',
+      id: 'hintWithoutSignIn',
+    });
+  }
+  const { howMany } = req.body;
+  const updatedBalance = account.hintBalance + howMany;
+  account.hintBalance = updatedBalance;
+  account.save();
+  return res.status(200).json({ updatedBalance });
+};
+
 const getToken = (req, res) => res.json({ csrfToken: req.csrfToken() });
 
 module.exports = {
   logout,
   login,
   signup,
+  buyHints,
   getToken,
 };
