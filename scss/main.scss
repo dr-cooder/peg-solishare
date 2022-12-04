@@ -52,6 +52,9 @@ body, .wrapper {
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
+}
+
+.bgHero, .bgNotFound {
   display: flex;
   flex-direction: column;
 }
@@ -73,6 +76,9 @@ body, .wrapper {
 #heroBtnRoot {
   margin-top: 2rem;
   min-height: 7rem;
+}
+
+#heroBtnRoot, .notFoundReturnLink {
   font-size: 1.5rem;
 }
 
@@ -129,8 +135,17 @@ body, .wrapper {
 
 .puzzleTile {
   background-color: #777;
+  transition: background-color .15s ease-in-out;
   padding: 1rem;
   border-radius: 1rem;
+}
+
+.puzzleTile:hover {
+  background-color: #888;
+}
+
+.puzzleTile:active {
+  background-color: #777;
 }
 
 .puzzleTile, .puzzleTile:hover {

@@ -10,7 +10,6 @@ const {
 const emptyBoardInstance = emptyBoard();
 const PuzzleThumbnail = (props) => {
   const { binCode } = props;
-  console.log(binCode);
   let i = 0;
   const spaceEls = [];
   for (let v = 0; v < height; v++) {

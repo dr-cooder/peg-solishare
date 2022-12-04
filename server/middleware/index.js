@@ -1,3 +1,4 @@
+const encodeUrl = require('encodeurl');
 const config = require('../config.js');
 
 // Only for debugging purposes
@@ -5,7 +6,7 @@ const enableMiddleware = true;
 
 const requiresLogin = (req, res, next) => {
   if (enableMiddleware && !req.session.account) {
-    return res.redirect('/login');
+    return res.redirect(`/login?next=${encodeUrl(req.url)}`);
   }
   return next();
 };

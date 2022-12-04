@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const _ = require('underscore');
 const { codeRegExps, defaultCodeBase } = require('../../client/puzzle.js');
-// const { Account } = require('.');
 
 let PuzzleModel = {};
 
@@ -51,7 +50,7 @@ PuzzleSchema.statics.findByCodeAndCreator = (code, username, callback) => {
     code,
   };
 
-  return PuzzleModel.find(search).select('title createdDate').lean().exec(callback);
+  return PuzzleModel.findOne(search).select('title createdDate').lean().exec(callback);
 };
 
 PuzzleSchema.statics.getAll = (callback) => PuzzleModel.find({}).select('title creatorName creatorId createdDate code').lean().exec(callback);
