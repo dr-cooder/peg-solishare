@@ -6,10 +6,20 @@ const {
   sampleCode,
 } = require('../../client/puzzle.js');
 const { byteToBits } = require('../../client/helpers.js');
+const { getAccount } = require('./controllerHelpers.js');
+const { Account } = require('../models');
 
 const hint = async (req, res, getTimelinePart) => {
-  // TO-DO: Create a stateful hint cache (of a fixed "circular" length?)
-  // because 3rd-party cloud service may not be very fast, or take well to too many requests
+  // Ensure the user is signed in with an account that can afford a hint
+  const { _id } = getAccount(req);
+  const account = await Account.findById(_id);
+  if (!account) {
+    return res.status(401).json({
+      message: 'You must be signed in to request a hint.',
+      id: 'hintWithoutSignIn',
+    });
+  }
+
   const { code } = req.query;
 
   // Confirm the input is valid first
@@ -22,9 +32,49 @@ const hint = async (req, res, getTimelinePart) => {
   const game = new Game(code);
   const ballCount = game.countBalls();
 
+  // Create an asynchronous helper function to register a hint transaction by the account,
+  // returning the updated hint balance
+  const chargeHint = async (responseJSON) => {
+    account.purchasedHints.push({
+      code,
+      hint: responseJSON.hint,
+      unsolvable: responseJSON.unsolvable,
+    });
+    const updatedBalance = account.hintBalance - 1;
+    account.hintBalance = updatedBalance;
+    await account.save();
+    return updatedBalance;
+  };
+
   // Don't worry about puzzles that are already solved
   if (ballCount === 1) {
-    return res.status(200).json({ alreadySolved: true });
+    return res.status(200).json({
+      alreadySolved: true,
+      updatedBalance: account.hintBalance,
+    });
+  }
+
+  // If the user has already purchased a hint for the given code, don't charge them
+  // and simply give them the desired hint from their personal "purchased hint" cache
+  // (This of course also avoids unnecessary calls to the Sacred Timeline)
+  const { purchasedHints } = account;
+  for (let i = 0; i < purchasedHints.length; i++) {
+    const purchasedHint = purchasedHints[i];
+    if (code === purchasedHint.code) {
+      return res.status(200).json({
+        hint: purchasedHint.hint,
+        unsolvable: purchasedHint.unsolvable,
+        updatedBalance: account.hintBalance,
+      });
+    }
+  }
+
+  // Otherise make sure charging them is within the realm of possibility
+  if (account.hintBalance - 1 < 0) {
+    return res.status(401).json({
+      message: 'You can\'t afford any more hints.',
+      id: 'insufficientHintBalance',
+    });
   }
 
   // Find all possible subsequent moves from given game
@@ -35,9 +85,15 @@ const hint = async (req, res, getTimelinePart) => {
   // If there are 2 balls left but no possible moves, the game is unsolvable from that state.
   if (ballCount === 2) {
     if (nextMovesLen === 0) {
-      return res.status(200).json({ unsolvable: true });
+      const responseJSON = { unsolvable: true };
+      const updatedBalance = await chargeHint(responseJSON);
+      responseJSON.updatedBalance = updatedBalance;
+      return res.status(200).json(responseJSON);
     }
-    return res.status(200).json({ hint: nextMoves[0] });
+    const responseJSON = { hint: nextMoves[0] };
+    const updatedBalance = await chargeHint(responseJSON);
+    responseJSON.updatedBalance = updatedBalance;
+    return res.status(200).json(responseJSON);
   }
 
   // Separate potential hints (possible moves from the given code and their resulting codes)
@@ -65,9 +121,18 @@ const hint = async (req, res, getTimelinePart) => {
   for (let i = 0; i < cachePartsNeededCount; i++) {
     cachePartPromises.push(getTimelinePart(ballCount - 1, cachePartsNeeded[i][0]));
   }
-  const cachePartBufs = await Promise.all(cachePartPromises);
+  let cachePartBufs;
+  try {
+    cachePartBufs = await Promise.all(cachePartPromises);
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Unable to access hint data.',
+      id: 'hintDataAccessProblem',
+    });
+  }
 
   let bitQueue;
+  let match;
   // Go through all of the received buffers
   for (let i = 0; i < cachePartsNeededCount; i++) {
     const buf = cachePartBufs[i];
@@ -79,19 +144,31 @@ const hint = async (req, res, getTimelinePart) => {
       bitQueue = '';
       for (let k = 0; k < buf.byteLength; k++) {
         bitQueue += byteToBits(buf[k]);
-        while (bitQueue.length >= slotCount) {
+        while (bitQueue.length >= slotCount && !match) {
           const solvableCode = bitQueue.slice(0, slotCount);
           bitQueue = bitQueue.slice(slotCount);
           if (solvableCode === potentialHint.code) {
-            return res.status(200).json({ hint: potentialHint.move });
+            match = potentialHint;
           }
         }
+        if (match) break;
       }
+      if (match) break;
     }
+    if (match) break;
   }
-
+  // Matching solvable puzzle found, return move required to get there
+  if (match) {
+    const responseJSON = { hint: match.move };
+    const updatedBalance = await chargeHint(responseJSON);
+    responseJSON.updatedBalance = updatedBalance;
+    return res.status(200).json(responseJSON);
+  }
   // No matches found, meaning the game is unsolvable from that point
-  return res.status(200).json({ unsolvable: true });
+  const responseJSON = { unsolvable: true };
+  const updatedBalance = await chargeHint(responseJSON);
+  responseJSON.updatedBalance = updatedBalance;
+  return res.status(200).json(responseJSON);
 };
 
 module.exports = {

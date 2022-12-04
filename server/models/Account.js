@@ -31,7 +31,6 @@ const AccountSchema = new mongoose.Schema({
       type: String,
       required: true,
       trim: true,
-      unique: true,
       match: codeRegExps[defaultCodeBase],
     },
     hint: {
@@ -44,6 +43,7 @@ const AccountSchema = new mongoose.Schema({
         y: Number,
       },
     },
+    unsolvable: Boolean,
   }],
   completedPuzzles: [{
     type: String,
@@ -54,6 +54,9 @@ const AccountSchema = new mongoose.Schema({
 
 AccountSchema.statics.toAPI = (doc) => ({
   username: doc.username,
+  hintBalance: doc.hintBalance,
+  purchasedHints: doc.purchasedHints,
+  completedPuzzles: doc.completedPuzzles,
   _id: doc._id,
 });
 

@@ -43,7 +43,7 @@ const loadImage = (url) => new Promise((resolve, reject) => {
   };
 });
 
-const sendPost = async (url, data, handler) => {
+const sendPost = async (url, data) => {
   const response = await fetch(url, {
     method: 'POST',
     headers: {
@@ -58,9 +58,7 @@ const sendPost = async (url, data, handler) => {
     window.location = result.redirect;
   }
 
-  if (handler) {
-    handler(result);
-  }
+  return result;
 };
 
 module.exports = {
