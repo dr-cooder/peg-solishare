@@ -1,6 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Squada+One&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Lobster&display=swap');
 
+.btn-xl {
+  padding: 0.75rem 1.5rem;
+  font-size: 2rem;
+  border-radius: 0.75rem;
+}
+
 .logo {
   white-space: nowrap;
   text-transform: uppercase;
@@ -33,7 +39,7 @@ a:hover {
 }
 
 body, .wrapper {
-  background: linear-gradient(to bottom right, #555, #333) fixed;
+  background: linear-gradient(to bottom right, #666, #333) fixed;
 }
 
 .wrapper {
@@ -66,7 +72,8 @@ body, .wrapper {
 
 #heroBtnRoot {
   margin-top: 2rem;
-  min-height: 5rem;
+  min-height: 7rem;
+  font-size: 1.5rem;
 }
 
 .welcomeUsername {
@@ -112,12 +119,54 @@ body, .wrapper {
   text-align: center;
 }
 
-.playTitle, .playCreator, .createTitle, .loginTitle {
-  text-align: center;
+.puzzleList {
+  display: grid;
+  max-width: 1000px;
+  margin: 2rem auto 0;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.puzzleTile {
+  background-color: #777;
+  padding: 1rem;
+  border-radius: 1rem;
+}
+
+.puzzleTile, .puzzleTile:hover {
+  color: white;
+  text-decoration: none;
+}
+
+.puzzleThumbGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.puzzleThumbSlot {
+  outline: 2px solid white;
+  outline-offset: -1px;
+}
+
+.puzzleThumbBall {
+  background-color: white;
+  margin: 20%;
+  height: 60%;
+  border-radius: 50%;
+}
+
+.puzzleTileTitle {
+  font-weight: bold;
+  margin-top: 1rem;
 }
 
 .spacedHeader {
-  margin-top: 2rem;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.playCreator, .noPuzzles {
+  text-align: center;
 }
 
 .hintPurchaseBtn {
@@ -163,6 +212,10 @@ body, .wrapper {
 
 .buttonContainerHoriz > .btn {
   width: 9rem;
+}
+
+.buttonContainerHoriz > .btn-xl {
+  width: 12rem;
 }
 
 .buttonContainerVert {

@@ -23,6 +23,7 @@ const upload = async (req, res, getTimelinePart) => {
 
   const puzzleData = {
     title,
+    creatorName: account.username,
     creatorId: _id,
     code,
   };
@@ -77,6 +78,15 @@ const upload = async (req, res, getTimelinePart) => {
     return res.status(400).json({ error: 'An error occurred.' });
   }
 };
+
+const getPuzzles = async (req, res) => Puzzle.getAll((err, docs) => {
+  if (err) {
+    console.log(err);
+    return res.status(400).json({ error: 'An error occurred.' });
+  }
+
+  return res.json({ puzzles: docs });
+});
 
 const hint = async (req, res, getTimelinePart) => {
   // Ensure the user is signed in with an account that can afford a hint
@@ -230,5 +240,6 @@ const hint = async (req, res, getTimelinePart) => {
 
 module.exports = {
   upload,
+  getPuzzles,
   hint,
 };
