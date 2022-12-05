@@ -5,15 +5,15 @@ const {
 const {
   distanceNoSqrt,
   loadImage,
-} = require('../common/helpers.js');
-const Game = require('../common/Game.js');
+} = require('../../common/helpers.js');
+const Game = require('../../common/Game.js');
 const {
   emptyBoard,
   width,
   height,
   defaultCodeBase,
   validateMoveStruct,
-} = require('../common/puzzle.js');
+} = require('../../common/puzzle.js');
 
 class GameBoardUI extends Component {
   constructor(props) {

@@ -1,5 +1,4 @@
-const GameBoardUI = require('./GameBoardUI.jsx');
-const ErrorMessage = require('./ErrorMessage.jsx');
+const { GameBoardUI, ErrorMessage } = require('./components');
 const { useState, useRef } = React;
 const { sendPost } = require('../common/helpers.js');
 

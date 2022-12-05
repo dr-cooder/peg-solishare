@@ -1,4 +1,4 @@
-const Nav = require('./Nav.jsx');
+const { Nav } = require('./components');
 
 const renderNav = (dontShowTitle, dontShowLogin) => {
   const navRootEl = document.getElementById('navRoot');
