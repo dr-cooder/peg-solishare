@@ -45,7 +45,7 @@ const signup = async (req, res) => {
     req.session.account = Account.toAPI(newAccount);
     return res.json({ redirect: req.body.next || '/explore' });
   } catch (err) {
-    console.log(err);
+    console.error(err);
     if (err.code === 11000) {
       return res.status(400).json({ error: 'Username is already in use!' });
     }
@@ -83,7 +83,7 @@ const changePassword = async (req, res) => {
       await account.save();
       return res.json({ message: 'Password update successful!' });
     } catch (err) {
-      console.log(err);
+      console.error(err);
       return res.status(400).json({ error: 'An error occurred' });
     }
   });
@@ -102,7 +102,7 @@ const buyHints = async (req, res) => {
     await account.save();
     return res.status(200).json({ updatedBalance });
   } catch (err) {
-    console.log(err);
+    console.error(err);
     return res.status(400).json({ error: 'An error occurred' });
   }
 };

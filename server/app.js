@@ -19,7 +19,7 @@ const router = require('./router.js');
 
 mongoose.connect(config.connections.mongo, (err) => {
   if (err) {
-    console.log('Could not connect to database');
+    console.error('Could not connect to MongoDB!');
     throw err;
   }
 });
@@ -87,7 +87,8 @@ app.use(csrf());
 app.use((err, req, res, next) => {
   if (err.code !== 'EBADCSRFTOKEN') return next(err);
 
-  console.log('Missing CSRF token!');
+  console.error('Missing CSRF token!');
+  console.error(req.url);
   return false;
 });
 
@@ -119,11 +120,11 @@ if (timelineDirectory && timelineUrlPattern) {
         return Buffer.from(partArrayBuffer);
       });
     }).catch((err) => {
-      console.error('Unable to parse timeline directory JSON.');
+      console.error('Unable to parse timeline directory JSON!');
       throw err;
     });
   }).catch((err) => {
-    console.error('Unable to fetch timeline directory. Please ensure the environment variable is a working link.');
+    console.error('Unable to fetch external timeline directory! Please ensure the environment variable is a working link!');
     throw err;
   });
 } else {

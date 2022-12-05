@@ -1,6 +1,5 @@
 const { sendPost } = require('../common/helpers.js');
-const GameBoardUI = require('./GameBoardUI.jsx');
-const ErrorMessage = require('./ErrorMessage.jsx');
+const { GameBoardUI, ErrorMessage } = require('./components');
 const { useState, createRef } = React;
 
 const CreateUI = (props) => {

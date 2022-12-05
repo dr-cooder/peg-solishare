@@ -21,7 +21,7 @@ const play = async (req, res) => {
 
   return Puzzle.findByCodeAndCreator(code, by, (err, doc) => {
     if (err) {
-      console.log(err);
+      console.error(err);
       return res.status(400).json({ error: 'An error occurred' });
     }
 

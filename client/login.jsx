@@ -1,7 +1,7 @@
 const { sendPost } = require('../common/helpers.js');
 const { renderNav } = require('./jsxHelpers.jsx');
 const { createRef } = React;
-const ErrorMessage = require('./ErrorMessage.jsx');
+const { ErrorMessage } = require('./components');
 
 const handleLogin = async (e, errMessage) => {
   e.preventDefault();

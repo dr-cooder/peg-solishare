@@ -80,7 +80,7 @@ const upload = async (req, res, getTimelinePart) => {
       code: newPuzzle.code,
     });
   } catch (err) {
-    console.log(err);
+    console.error(err);
     if (err.code === 11000) {
       return res.status(400).json({ error: 'Puzzle already exists!' });
     }
@@ -90,7 +90,7 @@ const upload = async (req, res, getTimelinePart) => {
 
 const getPuzzles = async (req, res) => Puzzle.getAll((err, docs) => {
   if (err) {
-    console.log(err);
+    console.error(err);
     return res.status(400).json({ error: 'An error occurred' });
   }
 
@@ -275,7 +275,7 @@ const submitSolution = async (req, res) => {
     await account.save();
     return res.status(200).json({ message: 'Solution verified!' });
   } catch (err) {
-    console.log(err);
+    console.error(err);
     return res.status(400).json({ error: 'An error occurred' });
   }
 };
