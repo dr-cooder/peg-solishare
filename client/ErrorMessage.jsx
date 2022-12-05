@@ -20,12 +20,21 @@ class ErrorMessage extends Component {
       });
     }
 
-    this.showError = (message) => {
+    this.showSpinner = () => {
+      this.setState({
+        color: 'white',
+        message:  <span className="spinner-border" role="status" aria-hidden="true"></span>,
+        linkText: '',
+        linkHref: '#',
+      });
+    }
+
+    this.showError = (message, linkText, linkHref) => {
       this.setState({
         color: 'danger',
         message,
-        linkText: '',
-        linkHref: '#',
+        linkText,
+        linkHref: linkHref || '#',
       });
     }
 

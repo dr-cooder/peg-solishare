@@ -93,7 +93,7 @@ const getPuzzles = async (req, res) => Puzzle.getAll((err, docs) => {
 });
 
 const hint = async (req, res, getTimelinePart) => {
-  // Ensure the user is signed in with an account that can afford a hint
+  // Ensure the user is signed in
   const { _id } = getAccount(req);
   const account = await Account.findById(_id);
   if (!account) {
@@ -242,8 +242,42 @@ const hint = async (req, res, getTimelinePart) => {
   return res.status(200).json(responseJSON);
 };
 
+const submitSolution = async (req, res) => {
+  // Ensure the user is signed in
+  const { _id } = getAccount(req);
+  const account = await Account.findById(_id);
+  if (!account) {
+    return res.status(401).json({ error: 'You must be signed in to submit a solution.' });
+  }
+
+  // Test the solution on the puzzle by performing it
+  const { code, solution } = req.body;
+  const game = new Game(code);
+  let moveSeriesPossible = true;
+  for (let i = 0; i < solution.length; i++) {
+    if (!game.makeMove(solution[i])) {
+      moveSeriesPossible = false;
+      break;
+    }
+  }
+
+  // If the solution doesn't check out, notify the user
+  if (!moveSeriesPossible || game.countBalls() !== 1) return res.status(400).json({ error: 'The provided solution to the given puzzle is not valid.' });
+
+  // Otherwise register that the user has solved this puzzle and let them know
+  try {
+    if (!account.completedPuzzles.includes(code)) account.completedPuzzles.push(code);
+    await account.save();
+    return res.status(200).json({ message: 'Solution verified!' });
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json({ error: 'An error occurred.' });
+  }
+};
+
 module.exports = {
   upload,
   getPuzzles,
   hint,
+  submitSolution,
 };

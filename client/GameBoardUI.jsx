@@ -29,10 +29,12 @@ class GameBoardUI extends Component {
     this.game = new Game(props.basis);
 
     this.code = (base = defaultCodeBase) => this.game.code(base);
+    this.history = () => this.game.moveHistory;
 
     this.editMode = props.editMode;
 
     this.onMove = props.onMove || (() => {});
+    this.onSolve = props.onSolve || (() => {});
     this.undo = () => {
       this.game.undo(this.editMode); // Any moves in the editor are in reverse
       this.hintOnDisplay = null;
@@ -137,6 +139,11 @@ class GameBoardUI extends Component {
 
     let tempMoveX = 0;
     let tempMoveY = 0;
+    const moveMadeCallback = () => {
+      this.hintOnDisplay = null;
+      this.onMove();
+      if (this.game.countBalls() === 1) this.onSolve();
+    }
     const mouseDownHandler = (e) => {
       if (this.state.disabled) return;
       updateMouseGrid(e);
@@ -147,7 +154,7 @@ class GameBoardUI extends Component {
           const thisSlot = slots[mouseGridY][mouseGridX];
           if (distanceNoSqrt(mouseX, mouseY, thisSlot.x, thisSlot.y) < ballRadiusSquared) {
             if (this.editMode === 'toggleBalls') {
-              if (this.game.toggleBall(mouseGridX, mouseGridY)) this.onMove();
+              if (this.game.toggleBall(mouseGridX, mouseGridY)) moveMadeCallback();
             } else {
               if (clickedSpaceValue === 1) {
                 this.setState({ holdingBall: true });
@@ -182,10 +189,7 @@ class GameBoardUI extends Component {
       } else {
         moveMade = this.game.makeMove(newMove);
       }
-      if (moveMade) {
-        this.hintOnDisplay = null;
-        this.onMove();
-      }
+      if (moveMade) moveMadeCallback();
     };
 
     canvasOuterEl.onmousedown = mouseDownHandler;

@@ -8,6 +8,7 @@ const PlayUI = (props) => {
   const [hintWaiting, setHintWaiting] = useState(false);
   const [buyHintWaiting, setBuyHintWaiting] = useState(false);
   const [hintIsOnDisplay, setHintIsOnDisplay] = useState(false);
+  const [puzzleSolved, setPuzzleSolved] = useState(false);
   const [hintCount, setHintCount] = useState(props.startingHintBalance);
   const gameRef = createRef();
   const errorMessageRef = useRef();
@@ -54,11 +55,27 @@ const PlayUI = (props) => {
     setHintIsOnDisplay(false);
   }
 
+  const submitSolution = async (gameRefCurrent, errorMessageRefCurrent) => {
+    setPuzzleSolved(true);
+    errorMessageRefCurrent.showSpinner();
+    const { error } = await sendPost('/solved', {
+      code: props.code,
+      solution: gameRefCurrent.history(),
+      _csrf: props.csrf,
+    });
+    if (error) {
+      errorMessageRefCurrent.showError(error);
+    } else {
+      errorMessageRefCurrent.showSuccess('Congratulations!', 'Return to puzzle explorer', '/explore');
+    }
+  }
+
   return (
     <>
-      <GameBoardUI ref={gameRef} disabled={hintWaiting} basis={props.code} onMove={() => handleMove(errorMessageRef.current)}/>
+      <GameBoardUI ref={gameRef} disabled={hintWaiting || puzzleSolved} basis={props.code}
+        onMove={() => handleMove(errorMessageRef.current)} onSolve={() => submitSolution(gameRef.current, errorMessageRef.current)}/>
       <div className="buttonContainerFlex buttonContainerHoriz">
-        <button id="hintButton" type="button" className="btn btn-warning btn-lg" disabled={hintIsOnDisplay || hintWaiting || buyHintWaiting}
+        <button id="hintButton" type="button" className="btn btn-warning btn-lg" disabled={hintIsOnDisplay || hintWaiting || buyHintWaiting || puzzleSolved}
           onClick={() => getHint(gameRef.current, errorMessageRef.current)}>
             {hintWaiting ?
               <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
@@ -66,11 +83,11 @@ const PlayUI = (props) => {
               <i className={hintIsOnDisplay ? `fa-solid fa-arrow-${undoHighlighted ? 'right' : 'up'}` : 'fa-regular fa-lightbulb'}></i>
             } Hints: {hintCount}
         </button>
-        <button id="undoButton" type="button" className={`btn btn-secondary btn-lg ${undoHighlighted ? 'undoButtonHighlighted' : ''}`} disabled={hintWaiting}
+        <button id="undoButton" type="button" className={`btn btn-secondary btn-lg ${undoHighlighted ? 'undoButtonHighlighted' : ''}`} disabled={hintWaiting || puzzleSolved}
           onClick={() => gameRef.current.undo()}><i className="fa-solid fa-arrow-rotate-left"></i> Undo</button>
       </div>
       <div>
-        <button className="btn btn-outline-warning btn-lg hintPurchaseBtn" disabled={hintWaiting || buyHintWaiting}
+        <button className="btn btn-outline-warning btn-lg hintPurchaseBtn" disabled={hintWaiting || buyHintWaiting || puzzleSolved}
           onClick={() => buyHints(5, errorMessageRef.current)}>
             {buyHintWaiting ?
               <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>

@@ -35,19 +35,13 @@ const play = async (req, res) => {
       startingHintBalance: account.hintBalance,
     });
   });
-  // return res.render('play', {
-  //   title: 'Disappearing Act 3',
-  //   creator: 'Rory',
-  //   code: '000010001110001111101111111000000',
-  //   startingHintBalance: account.hintBalance,
-  // });
 };
 
 const login = (req, res) => res.render('login', {
   csrfToken: req.csrfToken(),
   initial: typeof req.query.signup !== 'undefined' ? 'signup' : 'login',
   username: getAccount(req).username,
-  next: decodeURIComponent(req.query.next),
+  next: decodeURIComponent(req.query.next || ''),
 });
 
 const create = (req, res) => res.render('create');

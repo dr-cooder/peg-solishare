@@ -20,6 +20,7 @@ const router = (app, getTimelinePart) => {
 
   app.get('/hint', mid.requiresSecure, mid.requiresLogin, (req, res) => controllers.Puzzle.hint(req, res, getTimelinePart));
   app.post('/buy-hints', mid.requiresSecure, mid.requiresLogin, controllers.Account.buyHints);
+  app.post('/solved', mid.requiresSecure, mid.requiresLogin, controllers.Puzzle.submitSolution);
 
   app.post('/upload', mid.requiresSecure, mid.requiresLogin, (req, res) => controllers.Puzzle.upload(req, res, getTimelinePart));
 
