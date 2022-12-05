@@ -8,6 +8,7 @@ module.exports = {
     login: './client/login.jsx',
     explore: './client/explore.jsx',
     notFound: './client/notFound.jsx',
+    accountSettings: './client/accountSettings.jsx',
   },
   module: {
     rules: [

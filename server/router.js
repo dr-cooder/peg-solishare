@@ -14,6 +14,8 @@ const router = (app, getTimelinePart) => {
 
   app.get('/logout', mid.requiresSecure, mid.requiresLogin, controllers.Account.logout);
 
+  app.post('/change-password', mid.requiresSecure, mid.requiresLogin, controllers.Account.changePassword);
+
   app.get('/explore', mid.requiresLogin, controllers.Page.explore);
   app.get('/create', mid.requiresLogin, controllers.Page.create);
   app.get('/account', mid.requiresLogin, controllers.Page.accountSettings);
