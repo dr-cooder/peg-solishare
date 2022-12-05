@@ -42,7 +42,7 @@ const PuzzleList = (props) => {
 
   const puzzleNodes = props.puzzles.map(puzzle => {
     return (
-      <a href="/play" key={puzzle._id} className="puzzleTile">
+      <a href={`/play?code=${puzzle.code}&by=${puzzle.creatorName}`} key={puzzle._id} className="puzzleTile">
         <PuzzleThumbnail binCode={convertCodeBase(puzzle.code, defaultCodeBase, 2)}/>
         <div className="puzzleTileTitle">{puzzle.title}</div>
         <div>By {puzzle.creatorName}</div>
