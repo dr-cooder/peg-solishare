@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
-const { codeRegExps, defaultCodeBase } = require('../../client/puzzle.js');
+const { codeRegExps, defaultCodeBase } = require('../../common/puzzle.js');
 
 const saltRounds = 10;
 

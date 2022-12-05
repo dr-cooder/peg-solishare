@@ -1,4 +1,4 @@
-const { sendPost } = require('./helpers.js');
+const { sendPost } = require('../common/helpers.js');
 const { renderNav } = require('./jsxHelpers.jsx');
 const { createRef } = React;
 const ErrorMessage = require('./ErrorMessage.jsx');

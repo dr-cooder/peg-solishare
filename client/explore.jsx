@@ -5,7 +5,7 @@ const {
   emptyBoard,
   width,
   height,
-} = require('../client/puzzle.js');
+} = require('../common/puzzle.js');
 
 const emptyBoardInstance = emptyBoard();
 const PuzzleThumbnail = (props) => {

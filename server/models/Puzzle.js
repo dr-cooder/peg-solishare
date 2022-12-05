@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const _ = require('underscore');
-const { codeRegExps, defaultCodeBase } = require('../../client/puzzle.js');
+const { codeRegExps, defaultCodeBase } = require('../../common/puzzle.js');
 
 let PuzzleModel = {};
 

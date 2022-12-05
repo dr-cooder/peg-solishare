@@ -1,6 +1,6 @@
 const fs = require('fs');
-const { slotCount, convertCodeBase } = require('../client/puzzle.js');
-const { byteToBits, byteFromBitRemainder } = require('../client/helpers.js');
+const { slotCount, convertCodeBase } = require('../common/puzzle.js');
+const { byteToBits, byteFromBitRemainder } = require('../common/helpers.js');
 const PuzzleSet = require('./PuzzleSet.js');
 
 const ballCountName = process.argv[2];
