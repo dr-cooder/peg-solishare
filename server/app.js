@@ -111,7 +111,7 @@ if (timelineDirectory && timelineUrlPattern) {
       start(async (count, sample) => {
         const binName = `${count}-${sample}.bin`;
         const binId = json[binName];
-        if (!binId) return Buffer.from([]);
+        if (!binId) throw new Error('External Sacred Timeline directory is incomplete!');
         const url = `${urlLeft}${binId}${urlRight}`;
         const partResponse = await fetch(url);
         const partArrayBuffer = await partResponse.arrayBuffer();
@@ -119,19 +119,20 @@ if (timelineDirectory && timelineUrlPattern) {
         return Buffer.from(partArrayBuffer);
       });
     }).catch((err) => {
-      console.log('Unable to parse timeline directory JSON.');
+      console.error('Unable to parse timeline directory JSON.');
       throw err;
     });
   }).catch((err) => {
-    console.log('Unable to fetch timeline directory. Please ensure the environment variable is a working link.');
+    console.error('Unable to fetch timeline directory. Please ensure the environment variable is a working link.');
     throw err;
   });
 } else {
-  start((count, sample) => {
+  start(async (count, sample) => {
     try {
       return fs.readFileSync(`${__dirname}/../sacredTimeline/count-sample/${count}-${sample}.bin`);
     } catch (err) {
-      return Buffer.from([]);
+      console.error('Local Sacred Timeline is incomplete!');
+      throw err;
     }
   });
 }

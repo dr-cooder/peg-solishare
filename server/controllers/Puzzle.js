@@ -142,7 +142,7 @@ const hint = async (req, res, getTimelinePart) => {
   const { purchasedHints } = account;
   for (let i = 0; i < purchasedHints.length; i++) {
     const purchasedHint = purchasedHints[i];
-    if (code === purchasedHint.code) {
+    if (purchasedHint && code === purchasedHint.code) {
       return res.status(200).json({
         hint: purchasedHint.hint,
         unsolvable: purchasedHint.unsolvable,
