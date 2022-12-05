@@ -4,8 +4,8 @@ const {
   byteFromBitRemainder,
   progressPercent,
   doneHavingStartedAt,
-} = require('../client/helpers.js');
-const { slotCount } = require('../client/puzzle.js');
+} = require('../common/helpers.js');
+const { slotCount } = require('../common/puzzle.js');
 
 const indexBinDigits = slotCount - 3;
 const contentsSize = 2 ** (indexBinDigits);

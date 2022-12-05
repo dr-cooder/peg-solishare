@@ -1,11 +1,11 @@
-const Game = require('../../client/Game.js');
+const Game = require('../../common/Game.js');
 const {
   slotCount,
   isCode,
   codeSampleRange,
   sampleCode,
-} = require('../../client/puzzle.js');
-const { byteToBits } = require('../../client/helpers.js');
+} = require('../../common/puzzle.js');
+const { byteToBits } = require('../../common/helpers.js');
 const { getAccount } = require('./controllerHelpers.js');
 const { Account, Puzzle } = require('../models');
 

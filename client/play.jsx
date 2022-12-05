@@ -1,7 +1,7 @@
 const GameBoardUI = require('./GameBoardUI.jsx');
 const ErrorMessage = require('./ErrorMessage.jsx');
 const { useState, useRef } = React;
-const { sendPost } = require('./helpers.js');
+const { sendPost } = require('../common/helpers.js');
 
 const PlayUI = (props) => {
   const [undoHighlighted, setUndoHighlighted] = useState(false);

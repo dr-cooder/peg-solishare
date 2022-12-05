@@ -1,16 +1,16 @@
 const fs = require('fs');
-const Game = require('../client/Game.js');
+const Game = require('../common/Game.js');
 const {
   slotCount,
   codeSampleRange,
   sampleCode,
-} = require('../client/puzzle.js');
+} = require('../common/puzzle.js');
 const {
   byteToBits,
   byteFromBitRemainder,
   doneHavingStartedAt,
   progressPercent,
-} = require('../client/helpers.js');
+} = require('../common/helpers.js');
 const PuzzleSet = require('./PuzzleSet.js');
 
 const ballCountIn = parseInt(process.argv[2] || '1', 10);
