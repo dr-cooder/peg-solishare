@@ -1,6 +1,6 @@
 const GameBoardUI = require('./GameBoardUI.jsx');
 const ErrorMessage = require('./ErrorMessage.jsx');
-const { useState, createRef, useRef } = React;
+const { useState, useRef } = React;
 const { sendPost } = require('./helpers.js');
 
 const PlayUI = (props) => {
@@ -10,7 +10,7 @@ const PlayUI = (props) => {
   const [hintIsOnDisplay, setHintIsOnDisplay] = useState(false);
   const [puzzleSolved, setPuzzleSolved] = useState(false);
   const [hintCount, setHintCount] = useState(props.startingHintBalance);
-  const gameRef = createRef();
+  const gameRef = useRef();
   const errorMessageRef = useRef();
 
   const getHint = async (gameRefCurrent, errorMessageRefCurrent) => {
