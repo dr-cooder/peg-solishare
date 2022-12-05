@@ -7,7 +7,7 @@ const notFound = (req, res, customMessage) => res.status(404).render('notFound',
   customMessage: customMessage || 'The requested page was not found.',
 });
 
-const notFoundJSON = (req, res) => res.status(404).json({ error: 'Resource not found.' });
+const notFoundJSON = (req, res) => res.status(404).json({ error: 'Resource not found!' });
 
 const home = (req, res) => res.render('home', { username: getAccount(req).username });
 
@@ -22,7 +22,7 @@ const play = async (req, res) => {
   return Puzzle.findByCodeAndCreator(code, by, (err, doc) => {
     if (err) {
       console.log(err);
-      return res.status(400).json({ error: 'An error occurred.' });
+      return res.status(400).json({ error: 'An error occurred' });
     }
 
     // Don't let people play a puzzle that isn't in the database; it might not be solvable
@@ -48,7 +48,7 @@ const create = (req, res) => res.render('create');
 
 const explore = (req, res) => res.render('explore', { username: getAccount(req).username });
 
-const accountSettings = (req, res) => res.render('accountSettings');
+const accountSettings = (req, res) => res.render('accountSettings', { username: getAccount(req).username });
 
 module.exports = {
   home,

@@ -13,7 +13,7 @@ const upload = async (req, res, getTimelinePart) => {
   const { _id } = getAccount(req);
   const account = await Account.findById(_id);
   if (!account) {
-    return res.status(401).json({ error: 'You must be signed in to upload a puzzle.' });
+    return res.status(401).json({ error: 'You must be signed in to upload a puzzle!' });
   }
 
   const { title, code } = req.body;
@@ -34,7 +34,7 @@ const upload = async (req, res, getTimelinePart) => {
 
   // Ensure the code is valid
   if (!isCode(code)) {
-    return res.status(400).json({ error: `"${code}" is not a valid puzzle code.` });
+    return res.status(400).json({ error: 'Puzzle code is invalid!' });
   }
   const game = new Game(code);
 
@@ -50,7 +50,12 @@ const upload = async (req, res, getTimelinePart) => {
   // Check to see if the puzzle is solvable
   const binCode = game.code(2);
   const codeSample = sampleCode(binCode);
-  const buf = await getTimelinePart(ballCount, codeSample);
+  let buf;
+  try {
+    buf = await getTimelinePart(ballCount, codeSample);
+  } catch (err) {
+    return res.status(500).json({ error: 'Unable to verify solvability!' });
+  }
   let bitQueue = '';
   let matchFound = false;
   for (let k = 0; k < buf.byteLength; k++) {
@@ -79,14 +84,14 @@ const upload = async (req, res, getTimelinePart) => {
     if (err.code === 11000) {
       return res.status(400).json({ error: 'Puzzle already exists!' });
     }
-    return res.status(400).json({ error: 'An error occurred.' });
+    return res.status(400).json({ error: 'An error occurred' });
   }
 };
 
 const getPuzzles = async (req, res) => Puzzle.getAll((err, docs) => {
   if (err) {
     console.log(err);
-    return res.status(400).json({ error: 'An error occurred.' });
+    return res.status(400).json({ error: 'An error occurred' });
   }
 
   return res.json({ puzzles: docs });
@@ -97,14 +102,14 @@ const hint = async (req, res, getTimelinePart) => {
   const { _id } = getAccount(req);
   const account = await Account.findById(_id);
   if (!account) {
-    return res.status(401).json({ error: 'You must be signed in to request a hint.' });
+    return res.status(401).json({ error: 'You must be signed in to request a hint!' });
   }
 
   const { code } = req.query;
 
   // Confirm the input is valid first
   if (!isCode(code)) {
-    return res.status(400).json({ error: `"${code}" is not a valid puzzle code.` });
+    return res.status(400).json({ error: 'Puzzle code is invalid!' });
   }
   const game = new Game(code);
   const ballCount = game.countBalls();
@@ -148,7 +153,7 @@ const hint = async (req, res, getTimelinePart) => {
 
   // Otherise make sure charging them is within the realm of possibility
   if (account.hintBalance - 1 < 0) {
-    return res.status(401).json({ error: 'You are out of hints.' });
+    return res.status(401).json({ error: 'You are out of hints!' });
   }
 
   // Find all possible subsequent moves from given game
@@ -199,7 +204,7 @@ const hint = async (req, res, getTimelinePart) => {
   try {
     cachePartBufs = await Promise.all(cachePartPromises);
   } catch (err) {
-    return res.status(500).json({ error: 'Unable to access hint data.' });
+    return res.status(500).json({ error: 'Unable to find hints!' });
   }
 
   let bitQueue;
@@ -247,7 +252,7 @@ const submitSolution = async (req, res) => {
   const { _id } = getAccount(req);
   const account = await Account.findById(_id);
   if (!account) {
-    return res.status(401).json({ error: 'You must be signed in to submit a solution.' });
+    return res.status(401).json({ error: 'You must be signed in to submit a solution!' });
   }
 
   // Test the solution on the puzzle by performing it
@@ -262,16 +267,16 @@ const submitSolution = async (req, res) => {
   }
 
   // If the solution doesn't check out, notify the user
-  if (!moveSeriesPossible || game.countBalls() !== 1) return res.status(400).json({ error: 'The provided solution to the given puzzle is not valid.' });
+  if (!moveSeriesPossible || game.countBalls() !== 1) return res.status(400).json({ error: 'The provided solution to the given puzzle is not valid!' });
 
   // Otherwise register that the user has solved this puzzle and let them know
+  if (!account.completedPuzzles.includes(code)) account.completedPuzzles.push(code);
   try {
-    if (!account.completedPuzzles.includes(code)) account.completedPuzzles.push(code);
     await account.save();
     return res.status(200).json({ message: 'Solution verified!' });
   } catch (err) {
     console.log(err);
-    return res.status(400).json({ error: 'An error occurred.' });
+    return res.status(400).json({ error: 'An error occurred' });
   }
 };
 

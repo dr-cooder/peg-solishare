@@ -47,26 +47,64 @@ const signup = async (req, res) => {
   } catch (err) {
     console.log(err);
     if (err.code === 11000) {
-      return res.status(400).json({ error: 'Username already in use.' });
+      return res.status(400).json({ error: 'Username is already in use!' });
     }
     return res.status(400).json({ error: 'An error occurred' });
   }
+};
+
+const changePassword = async (req, res) => {
+  const { username, _id } = getAccount(req);
+  const account = await Account.findById(_id);
+  if (!account) {
+    return res.status(401).json({ error: 'You must be signed in to change your password!' });
+  }
+
+  const oldPass = `${req.body.oldPass}`;
+  const newPass = `${req.body.newPass}`;
+  const newPass2 = `${req.body.newPass2}`;
+
+  if (!oldPass || !newPass || !newPass2) {
+    return res.status(400).json({ error: 'All fields are required!' });
+  }
+
+  if (newPass !== newPass2) {
+    return res.status(400).json({ error: 'New passwords do not match!' });
+  }
+
+  return Account.authenticate(username, oldPass, async (authErr, matchingAaccount) => {
+    if (authErr || !matchingAaccount) {
+      return res.status(401).json({ error: 'Old password is incorrect! (they are cAse-sENsItiVE)' });
+    }
+
+    try {
+      const newHash = await Account.generateHash(newPass);
+      account.password = newHash;
+      await account.save();
+      return res.json({ message: 'Password update successful!' });
+    } catch (err) {
+      console.log(err);
+      return res.status(400).json({ error: 'An error occurred' });
+    }
+  });
 };
 
 const buyHints = async (req, res) => {
   const { _id } = getAccount(req);
   const account = await Account.findById(_id);
   if (!account) {
-    return res.status(401).json({
-      message: 'You must be signed in to buy hints.',
-      id: 'hintWithoutSignIn',
-    });
+    return res.status(401).json({ error: 'You must be signed in to buy hints!' });
   }
   const { howMany } = req.body;
   const updatedBalance = account.hintBalance + howMany;
   account.hintBalance = updatedBalance;
-  account.save();
-  return res.status(200).json({ updatedBalance });
+  try {
+    await account.save();
+    return res.status(200).json({ updatedBalance });
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json({ error: 'An error occurred' });
+  }
 };
 
 const getToken = (req, res) => res.json({ csrfToken: req.csrfToken() });
@@ -75,6 +113,7 @@ module.exports = {
   logout,
   login,
   signup,
+  changePassword,
   buyHints,
   getToken,
 };
