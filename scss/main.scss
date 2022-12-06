@@ -1,6 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Squada+One&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Lobster&display=swap');
 
+/* https://stackoverflow.com/questions/36212722/how-to-prevent-pull-down-to-refresh-of-mobile-chrome */
+html, body {
+  overscroll-behavior: contain;
+}
+
 .btn-xl {
   padding: 0.75rem 1.5rem;
   font-size: 2rem;
@@ -213,10 +218,18 @@ body, .wrapper {
   max-width: 600px;
 }
 
-.gameBoardCanvas {
+.gameBoardCanvas, .gameBoardNoCanvas {
   user-select: none;
   width: inherit;
   height: inherit;
+}
+
+.gameBoardNoCanvas {
+  background-image: url('./img/board.png');
+  background-size: contain;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .buttonContainerFlex {

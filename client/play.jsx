@@ -72,7 +72,8 @@ const PlayUI = (props) => {
   return (
     <>
       <GameBoardUI ref={gameRef} disabled={hintWaiting || puzzleSolved} basis={props.code}
-        onMove={() => handleMove(errorMessageRef.current)} onSolve={() => submitSolution(gameRef.current, errorMessageRef.current)}/>
+        onMove={() => handleMove(errorMessageRef.current)} onSolve={() => submitSolution(gameRef.current, errorMessageRef.current)}
+        onNoCanvas={() => setPuzzleSolved(true)}/>
       <div className="buttonContainerFlex buttonContainerHoriz">
         <button id="hintButton" type="button" className="btn btn-warning btn-lg" disabled={hintIsOnDisplay || hintWaiting || buyHintWaiting || puzzleSolved}
           onClick={() => getHint(gameRef.current, errorMessageRef.current)}>

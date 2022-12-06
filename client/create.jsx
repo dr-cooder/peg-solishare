@@ -20,7 +20,7 @@ const CreateUI = (props) => {
   const gameRef = createRef();
   const nameInputRef = createRef();
   const errorMessageRef = createRef();
-  const starterCode = `${'0'.repeat(16)}1${'0'.repeat(16)}`; // One ball in the middle
+  const starterCode = `${'0'.repeat(16)}1${'0'.repeat(16)}`; // One ball in the middle for the "boilerplate puzzle"
   const editModeRadioChanged = (e) => {
     gameRef.current.editMode = e;
     setCurrentEditMode(e);
@@ -46,7 +46,8 @@ const CreateUI = (props) => {
 
   return (
     <>
-      <GameBoardUI ref={gameRef} disabled={uploadWaiting || uploadSuccess} basis={starterCode} editMode={editModeDefault}/>
+      <GameBoardUI ref={gameRef} disabled={uploadWaiting || uploadSuccess} basis={starterCode} editMode={editModeDefault}
+        onNoCanvas={() => setUploadSuccess(true)}/>
       <h3>Edit mode</h3>
       <div className="editModeContainer">
         {editModes.map((e, i) => {

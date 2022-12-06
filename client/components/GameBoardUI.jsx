@@ -22,6 +22,7 @@ class GameBoardUI extends Component {
     this.state = {
       disabled: false,
       holdingBall: false,
+      noCanvas: false,
     };
 
     this.canvasRef = createRef();
@@ -35,6 +36,7 @@ class GameBoardUI extends Component {
 
     this.onMove = props.onMove || (() => {});
     this.onSolve = props.onSolve || (() => {});
+    this.onNoCanvas = props.onNoCanvas || (() => {});
     this.undo = () => {
       this.game.undo(this.editMode); // Any moves in the editor are in reverse
       this.hintOnDisplay = null;
@@ -60,6 +62,12 @@ class GameBoardUI extends Component {
   componentDidMount() {
     // https://medium.com/@pdx.lucasm/canvas-with-react-js-32e133c05258
     const canvasEl = this.canvasRef.current;
+    // https://stackoverflow.com/questions/2745432/best-way-to-detect-that-html5-canvas-is-not-supported
+    if (!(canvasEl.getContext && canvasEl.getContext('2d'))) {
+      this.setState({ noCanvas: true });
+      this.onNoCanvas();
+      return;
+    }
     const canvasWidth = canvasEl.width;
     const canvasHeight = canvasEl.height;
     const canvasOuterEl = this.canvasOuterRef.current;
@@ -279,7 +287,13 @@ class GameBoardUI extends Component {
       <div ref={this.canvasOuterRef} className="gameBoardCanvasOuter">
         <div className="ratio1x1">
           <div className="ratioContainer">
-            <canvas ref={this.canvasRef} className="gameBoardCanvas" width="600" height="600"/>
+            {this.state.noCanvas?
+              <div className="gameBoardNoCanvas">
+                <h3>Canvas support is required by Peg SoliShare! Please use a newer browser!</h3>
+              </div>
+              :
+              <canvas ref={this.canvasRef} className="gameBoardCanvas" width="600" height="600"/>
+            }
           </div>
         </div>
       </div>

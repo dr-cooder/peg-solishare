@@ -1,17 +1,17 @@
 const mongoose = require('mongoose');
-const _ = require('underscore');
+// const _ = require('underscore');
 const { codeRegExps, defaultCodeBase } = require('../../common/puzzle.js');
 
 let PuzzleModel = {};
 
-const setTitle = (title) => _.escape(title).trim();
+// const setTitle = (title) => _.escape(title).trim();
 
 const PuzzleSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
     trim: true,
-    set: setTitle,
+    // set: setTitle,
   },
   creatorName: {
     type: String,
