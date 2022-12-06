@@ -26,25 +26,25 @@ const AccountSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
-  purchasedHints: [{
-    code: {
-      type: String,
-      required: true,
-      trim: true,
-      match: codeRegExps[defaultCodeBase],
-    },
-    hint: {
-      from: {
-        x: Number,
-        y: Number,
-      },
-      to: {
-        x: Number,
-        y: Number,
-      },
-    },
-    unsolvable: Boolean,
-  }],
+  // purchasedHints: [{
+  //   code: {
+  //     type: String,
+  //     required: true,
+  //     trim: true,
+  //     match: codeRegExps[defaultCodeBase],
+  //   },
+  //   hint: {
+  //     from: {
+  //       x: Number,
+  //       y: Number,
+  //     },
+  //     to: {
+  //       x: Number,
+  //       y: Number,
+  //     },
+  //   },
+  //   unsolvable: Boolean,
+  // }],
   completedPuzzles: [{
     type: String,
     trim: true,
@@ -53,11 +53,11 @@ const AccountSchema = new mongoose.Schema({
   }],
 });
 
-AccountSchema.index({
-  purchasedHints: {
-    code: 1,
-  },
-});
+// AccountSchema.index({
+//   purchasedHints: {
+//     code: 1,
+//   },
+// });
 
 AccountSchema.statics.toAPI = (doc) => ({
   username: doc.username,
