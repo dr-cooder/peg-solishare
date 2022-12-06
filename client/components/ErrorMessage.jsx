@@ -4,20 +4,16 @@ class ErrorMessage extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {
+    const defaultState = {
       color: 'danger',
       message: '',
       linkText: '',
       linkHref: '#',
     }
+    this.state = defaultState
 
     this.clearMessage = () => {
-      this.setState({
-        color: 'danger',
-        message: '',
-        linkText: '',
-        linkHref: '#',
-      });
+      this.setState(defaultState);
     }
 
     this.showSpinner = () => {

@@ -1,11 +1,15 @@
+// Sqrt is computationally expensive and currently the only place that needs this
+// already has a fixed "C squared"
 const distanceNoSqrt = (x1, y1, x2, y2) => {
   const xDiff = x2 - x1;
   const yDiff = y2 - y1;
   return xDiff * xDiff + yDiff * yDiff;
 };
 
+// Turns byte into an 8-bit 0/1 string
 const byteToBits = (byte) => byte.toString(2).padStart(8, '0');
 
+// Turns bits remaining in a queue string into a padded-out byte so it can be translated back
 const byteFromBitRemainder = (bits) => parseInt(bits.padEnd(8, '0'), 2);
 
 // Format miliseconds in HH:MM:SS.MMM
@@ -43,6 +47,7 @@ const loadImage = (url) => new Promise((resolve, reject) => {
   };
 });
 
+// Send a POST request and return the response
 const sendPost = async (url, data) => {
   const response = await fetch(url, {
     method: 'POST',

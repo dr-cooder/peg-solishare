@@ -73,7 +73,7 @@ class GameBoardUI extends Component {
     const canvasOuterEl = this.canvasOuterRef.current;
     const ctx = canvasEl.getContext('2d');
 
-    const emptyBoardRef = emptyBoard();
+    // Establish some constants in pixels and grid units
     const gridTop = 109;
     const gridLeft = 109;
     const gridWidth = 382;
@@ -87,24 +87,27 @@ class GameBoardUI extends Component {
     const ballImgCenterX = ballImgWidth / 2;
     const ballImgCenterY = ballImgHeight / 2;
 
+    // Find the center x and y coordinates each slot represents
+    const emptyBoardRef = emptyBoard();
     const slots = [];
     for (let v = 0; v < height; v++) {
       const thisRow = [];
       const thisRowY = spaceHeight * (v + 0.5) + gridTop;
-      const thisRowTop = spaceHeight * v + gridTop;
+      // const thisRowTop = spaceHeight * v + gridTop;
       for (let u = 0; u < width; u++) {
         if (emptyBoardRef[v][u] !== 2) {
           thisRow[u] = {
             x: spaceWidth * (u + 0.5) + gridLeft,
             y: thisRowY,
-            left: spaceWidth * u + gridLeft,
-            top: thisRowTop
+            // left: spaceWidth * u + gridLeft,
+            // top: thisRowTop
           };
         }
       }
       slots[v] = thisRow;
     }
 
+    // Establish image assets that will be needed
     const imgFilenames = {
       board: 'board.png',
       ball: 'ball.png',
@@ -114,6 +117,7 @@ class GameBoardUI extends Component {
     const imageCount = imgFilenameKvps.length;
     const imgs = {};
 
+    // Get where the mouse is in the space of the canvas (taking location and scale into account)
     let mouseX = canvasWidth / 2;
     let mouseY = canvasHeight / 2;
     const updateMouse = (e) => {
@@ -122,6 +126,7 @@ class GameBoardUI extends Component {
       let rawX;
       let rawY;
 
+      // Account for touch screens, read as if mouse
       const inputType = e.type.slice(0, 5);
       if (inputType === 'touch') {
         rawX = e.touches[0].pageX;
@@ -145,6 +150,7 @@ class GameBoardUI extends Component {
       mouseGridY = Math.floor((mouseY - gridTop) / spaceHeight);
     };
 
+    // Handle moves
     let tempMoveX = 0;
     let tempMoveY = 0;
     const moveMadeCallback = () => {
@@ -154,6 +160,7 @@ class GameBoardUI extends Component {
     }
     const mouseDownHandler = (e) => {
       if (this.state.disabled) return;
+      // Ensure the user clicked on a valid grid location
       updateMouseGrid(e);
       const clickedRow = this.game.puzzle[mouseGridY];
       if (clickedRow) {
@@ -161,6 +168,7 @@ class GameBoardUI extends Component {
         if (typeof clickedSpaceValue !== 'undefined') {
           const thisSlot = slots[mouseGridY][mouseGridX];
           if (distanceNoSqrt(mouseX, mouseY, thisSlot.x, thisSlot.y) < ballRadiusSquared) {
+            // Handle move (or start of move) according to input mode
             if (this.editMode === 'toggleBalls') {
               if (this.game.toggleBall(mouseGridX, mouseGridY)) moveMadeCallback();
             } else {
@@ -175,6 +183,7 @@ class GameBoardUI extends Component {
       }
     };
     const mouseUpHandler = (e) => {
+      // If in toggle balls mode this shouldn't do anything
       if (this.state.disabled || !this.state.holdingBall || this.editMode === 'toggleBalls') return;
       this.setState({ holdingBall: false });
       updateMouseGrid(e);
@@ -189,6 +198,7 @@ class GameBoardUI extends Component {
         },
       };
       let moveMade;
+      // If moving in reverse, the inputted "from" and "to" switch roles
       if (this.editMode === 'solveReverse') {
         moveMade = this.game.makeMove({
           from: newMove.to,
@@ -197,6 +207,7 @@ class GameBoardUI extends Component {
       } else {
         moveMade = this.game.makeMove(newMove);
       }
+      // Leave determining whether the move was valid up to the Game class
       if (moveMade) moveMadeCallback();
     };
 
@@ -216,10 +227,6 @@ class GameBoardUI extends Component {
       ctx.clearRect(0, 0, canvasWidth, canvasHeight);
       ctx.drawImage(imgs.board, 0, 0, canvasWidth, canvasHeight);
 
-      ctx.lineWidth = 3;
-      ctx.lineJoin = 'miter';
-      ctx.strokeStyle = 'black';
-      ctx.fillStyle = 'black';
       for (let v = 0; v < height; v++) {
         for (let u = 0; u < width; u++) {
           const thisSlot = slots[v][u];
@@ -233,6 +240,7 @@ class GameBoardUI extends Component {
       }
 
       if (this.hintOnDisplay) {
+        // Draw an arrow indicating the hint move
         ctx.lineWidth = 6;
         ctx.lineJoin = 'round';
         ctx.strokeStyle = 'red';
@@ -242,12 +250,15 @@ class GameBoardUI extends Component {
         const fromSlot = slots[thisHintFrom.y][thisHintFrom.x];
         const fromSlotX = fromSlot.x;
         const fromSlotY = fromSlot.y;
+
         const thisHintTo = this.hintOnDisplay.to;
         const toSlot = slots[thisHintTo.y][thisHintTo.x];
         const toSlotX = toSlot.x;
         const toSlotY = toSlot.y;
+
         const slotDeltaX = toSlotX - fromSlotX;
         const slotDeltaY = toSlotY - fromSlotY;
+        // Arrow point base is perpendicular to line
         const pointBottomX = fromSlotX + slotDeltaX * 0.75;
         const pointBottomY = fromSlotY + slotDeltaY * 0.75;
         const pointCornerX = slotDeltaY * 0.05;
@@ -265,11 +276,13 @@ class GameBoardUI extends Component {
         ctx.fill();
       }
 
+      // Draw the ball the user is holding above all else
       if (this.state.holdingBall) {
         ctx.drawImage(imgs.ball, mouseX - ballImgCenterX, mouseY - ballImgCenterY, ballImgWidth, ballImgHeight);
       }
     };
 
+    // Load all image assets then start!
     const imgPromises = [];
     for (let i = 0; i < imageCount; i++) {
       imgPromises[i] = loadImage(`assets/img/${imgFilenameKvps[i][1]}`)

@@ -62,6 +62,7 @@ const validMoveDeltas = [
   },
 ];
 const validMoveDeltaCount = 4;
+// find which of the valid move directions a given move matches
 const findMoveDelta = (fromX, fromY, toX, toY) => {
   const deltaX = toX - fromX;
   const deltaY = toY - fromY;
@@ -171,7 +172,7 @@ const codeLengths = [];
 for (let i = 2; i <= 36; i++) codeLengths[i] = codeLength(i);
 // https://stackoverflow.com/questions/36562953/converting-binary-to-hexadecimal
 const convertCodeBase = (code, from, to) => parseInt(code, from).toString(to).padStart(codeLengths[to], '0');
-const defaultCodeBase = 36; // 16
+const defaultCodeBase = 36; // 16 // 36 is technically the most character-length-efficient base
 
 // These lengths can also be used to create a cache of RegExps which can be used to verify that
 // the passed-in code matches the format of the given code base
@@ -274,7 +275,9 @@ const countBalls = (puzzle) => {
   return ballCount;
 };
 
+// Sample slots on a diamond formation
 const codeSampleIndexes = [
+  // Small plus configuration (not sufficient in dividing into smaller files)
   // 4,
   // 14, 16, 18,
   // 28,
@@ -294,6 +297,7 @@ const sampleCode = (binCode) => {
   return parseInt(sampleBin, 2);
 };
 
+// Ensure an object is in the { from: {x, y}, to: {x, y} } format
 const validateMoveStruct = (move) => move && move.from && typeof move.from.x === 'number' && typeof move.from.y === 'number'
   && move.to && typeof move.to.x === 'number' && typeof move.from.y === 'number';
 

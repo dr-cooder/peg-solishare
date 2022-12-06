@@ -141,6 +141,8 @@ class Game {
     return true;
   }
 
+  // Returns true if the toggle was performed successfully
+  // (unsuccessful if space is a "no slot" space)
   toggleBall(x, y, dontAddToHistory) {
     const spaceOld = this.puzzle[y][x];
     if (spaceOld === 2) return false;
@@ -149,9 +151,12 @@ class Game {
     return true;
   }
 
+  // Undoing is really just making the most recent move in reverse
+  // and removing that move from the history
   undo(reverse) {
     const moveToUndo = this.moveHistory.pop();
     if (!moveToUndo) return;
+    // Adapt to the input type of the move
     const { toggle } = moveToUndo;
     if (toggle) {
       this.toggleBall(toggle.x, toggle.y, true);
@@ -160,6 +165,7 @@ class Game {
     }
   }
 
+  // Just to reduce the amount of typing in game.puzzle.countBalls
   countBalls() {
     return countBalls(this.puzzle);
   }
@@ -169,6 +175,7 @@ class Game {
     return this.puzzle.map((r) => Array.from(r).map((c) => ['.', 'O', ' '][c]).join(' ')).join('\n');
   }
 
+  // Similar to countBalls, to absolve unnecessary typing
   code(base = defaultCodeBase) {
     return puzzleToCode(this.puzzle, base);
   }

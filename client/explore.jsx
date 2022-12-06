@@ -9,6 +9,7 @@ const {
 
 const emptyBoardInstance = emptyBoard();
 const PuzzleThumbnail = (props) => {
+  // Represent puzzle as a CSS grid
   const { binCode } = props;
   let i = 0;
   const spaceEls = [];
@@ -35,11 +36,14 @@ const PuzzleThumbnail = (props) => {
 
 const PuzzleList = (props) => {
   if (props.puzzles.length === 0) {
+    // No puzzles found in database
+    // https://youtu.be/yD2FSwTy2lw
     return (
       <h3 className="noPuzzles">No one's around to help. &#x1F63C;</h3>
     );
   }
 
+  // Make a list of "tiles", each representing and linking to a puzzle
   const puzzleNodes = props.puzzles.map(puzzle => {
     return (
       <a href={`/play?code=${puzzle.code}&by=${puzzle.creatorName}`} key={puzzle._id} className="puzzleTile">
@@ -57,6 +61,7 @@ const PuzzleList = (props) => {
   );
 };
 
+// Load puzzles from server and display them on the page via PuzzleList component
 const loadPuzzlesFromServer = async (puzzleListRoot, _csrf) => {
   const response = await fetch('/get-puzzles');
   const data = await response.json();
