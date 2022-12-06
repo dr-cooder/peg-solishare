@@ -54,7 +54,9 @@ const AccountSchema = new mongoose.Schema({
 });
 
 AccountSchema.index({
-  purchasedHints: 1,
+  purchasedHints: {
+    code: 1,
+  },
 });
 
 AccountSchema.statics.toAPI = (doc) => ({
