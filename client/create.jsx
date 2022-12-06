@@ -21,6 +21,7 @@ const CreateUI = (props) => {
   const nameInputRef = createRef();
   const errorMessageRef = createRef();
   const starterCode = `${'0'.repeat(16)}1${'0'.repeat(16)}`; // One ball in the middle for the "boilerplate puzzle"
+  // https://www.techiedelight.com/bind-change-event-handler-radio-button-javascript/
   const editModeRadioChanged = (e) => {
     gameRef.current.editMode = e;
     setCurrentEditMode(e);

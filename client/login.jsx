@@ -129,6 +129,7 @@ const init = async () => {
   const { next, initial } = loginContentRootEl.dataset;
   const loginContentRoot = ReactDOM.createRoot(loginContentRootEl);
 
+  // Allow components to call switching back and forth from one to another through an external, self-referencing function
   const showWindow = (signup) => {
     if (signup) {
       document.title = 'Sign up - Peg SoliShare';

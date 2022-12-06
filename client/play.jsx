@@ -23,6 +23,8 @@ const PlayUI = (props) => {
     if (response.status !== 200) {
       errorMessageRefCurrent.showError(error);
     } else if (unsolvable) {
+      // Puzzle is unsolvable - highlight the undo button in the
+      // same style as the move hint arrows, as undoing from here *is* the hint
       setUndoHighlighted(true);
       setHintIsOnDisplay(true);
       errorMessageRefCurrent.clearMessage();
@@ -48,6 +50,7 @@ const PlayUI = (props) => {
     setBuyHintWaiting(false);
   }
 
+  // If a move was made, hints and warnings of the previous state no longer apply
   const handleMove = (errorMessageRefCurrent) => {
     errorMessageRefCurrent.clearMessage();
     setUndoHighlighted(false);
