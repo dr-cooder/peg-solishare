@@ -49,6 +49,7 @@ const AccountSchema = new mongoose.Schema({
     type: String,
     trim: true,
     match: codeRegExps[defaultCodeBase],
+    sparse: true,
   }],
 });
 

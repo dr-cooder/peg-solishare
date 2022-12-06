@@ -53,7 +53,8 @@ PuzzleSchema.statics.findByCodeAndCreator = (code, username, callback) => {
   return PuzzleModel.findOne(search).select('title createdDate').lean().exec(callback);
 };
 
-PuzzleSchema.statics.getAll = (callback) => PuzzleModel.find({}).select('title creatorName creatorId createdDate code').lean().exec(callback);
+PuzzleSchema.statics.getAll = (callback) => PuzzleModel.find({}).sort({ createdDate: 'desc' }).select('title creatorName creatorId createdDate code').lean()
+  .exec(callback);
 
 PuzzleModel = mongoose.model('Puzzle', PuzzleSchema);
 
