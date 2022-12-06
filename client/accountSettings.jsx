@@ -41,6 +41,7 @@ const AccountSettingsContent = (props) => {
     <>
       <h2 className="spacedHeader">Change password</h2>
       <form id="passwordChangeForm"
+        className="centered"
         name="passwordChangeForm"
         onSubmit={(e) => handlePasswordChange(e)}
         action="/change-password">

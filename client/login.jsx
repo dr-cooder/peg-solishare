@@ -58,11 +58,11 @@ const LoginWindow = (props) => {
     <>
       <h1 className="spacedHeader">Log in</h1>
       <form id="loginForm"
+        className="centered"
         name="loginForm"
         onSubmit={(e) => handleLogin(e, errorMessageRef.current)}
         action="/login"
         method="POST"
-        className="mainForm"
       >
         <div className="formTextboxes">
           <label htmlFor="username">Username: </label>
@@ -91,11 +91,11 @@ const SignupWindow = (props) => {
     <>
       <h1 className="spacedHeader">Sign up</h1>
       <form id="signupForm"
+        className="centered"
         name="signupForm"
         onSubmit={(e) => handleSignup(e, errorMessageRef.current)}
         action="/signup"
         method="POST"
-        className="mainForm"
       >
         <div className="formTextboxes">
           <label htmlFor="username">Username: </label>
