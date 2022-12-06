@@ -5,7 +5,7 @@ const router = (app, getTimelinePart) => {
   app.get('/token', mid.requiresSecure, controllers.Account.getToken);
 
   app.get('/', controllers.Page.home);
-  app.get('/play', controllers.Page.play);
+  app.get('/play', mid.requiresLogin, controllers.Page.play);
 
   app.get('/login', mid.requiresSecure, mid.requiresLogout, controllers.Page.login);
   app.post('/login', mid.requiresSecure, mid.requiresLogout, controllers.Account.login);

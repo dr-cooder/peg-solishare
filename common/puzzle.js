@@ -159,7 +159,7 @@ const codeImages = (binCode) => {
   return Array.from(gameCodeImageSet);
 };
 
-// Create a cache of the expected max character lengths of codes of all possible bases namely,
+// Create a cache of the expected max character lengths of codes of all possible bases - namely,
 // binary codes should be of length 33 (there are 33 slots and 0/1 is analogous to empty/ball),
 // hexadecimal codes should be of length 9, and hexaTRIdecimal (Base36) codes should be of length 7.
 // One use for this information is padding out raw base-x-converted numbers with leading zeroes
@@ -169,6 +169,7 @@ const fullBoardCodeInt = parseInt('1'.repeat(slotCount), 2);
 const codeLength = (base) => fullBoardCodeInt.toString(base).length;
 const codeLengths = [];
 for (let i = 2; i <= 36; i++) codeLengths[i] = codeLength(i);
+// https://stackoverflow.com/questions/36562953/converting-binary-to-hexadecimal
 const convertCodeBase = (code, from, to) => parseInt(code, from).toString(to).padStart(codeLengths[to], '0');
 const defaultCodeBase = 36; // 16
 

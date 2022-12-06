@@ -96,6 +96,9 @@ const buyHints = async (req, res) => {
     return res.status(401).json({ error: 'You must be signed in to buy hints!' });
   }
   const { howMany } = req.body;
+  if (!howMany || Number.isNaN(howMany)) {
+    return res.status(400).json({ error: 'Please specify how many hints you want to purchase as a number!' });
+  }
   const updatedBalance = account.hintBalance + howMany;
   account.hintBalance = updatedBalance;
   try {

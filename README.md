@@ -9,7 +9,6 @@ In Peg SoliShare, players can play Peg Solitaire puzzles created by other player
 ### Help and Snippets
 - https://stackoverflow.com/questions/36562953/converting-binary-to-hexadecimal
 - https://stackoverflow.com/questions/60688935/my-canvas-drawing-app-wont-work-on-mobile
-- https://stackoverflow.com/questions/29216551/making-a-gulpfile-getting-an-error-when-call-gulp-parallel
 - https://chrispennington.blog/blog/20201219-compile-and-minify-scss-with-gulpjs-in-hugo/
 - https://stackoverflow.com/questions/21988909/is-it-possible-to-create-a-fixed-length-array-in-javascript
 - https://stackoverflow.com/questions/1779013/check-if-string-contains-only-digits
@@ -24,6 +23,7 @@ In Peg SoliShare, players can play Peg Solitaire puzzles created by other player
 - https://webapps.stackexchange.com/questions/88769/get-share-link-of-multiple-files-in-google-drive-to-put-in-spreadsheet
 - https://www.techiedelight.com/bind-change-event-handler-radio-button-javascript/
 - https://stackoverflow.com/questions/6528876/how-to-redirect-404-errors-to-a-page-in-expressjs
+- https://stackoverflow.com/questions/36212722/how-to-prevent-pull-down-to-refresh-of-mobile-chrome
 - Bootstrap documentation
 ### External Components
 - Bootstrap
