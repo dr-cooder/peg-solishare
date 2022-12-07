@@ -115,6 +115,12 @@ if (timelineDirectory && timelineUrlPattern) {
         if (!binId) throw new Error('External Sacred Timeline directory is incomplete!');
         const url = `${urlLeft}${binId}${urlRight}`;
         const partResponse = await fetch(url);
+        const partStatus = partResponse.status;
+        // If anything but the expected file is returned (i.e. a 429 HTML page)
+        // it will still be read as raw binary, and as such an incorrect Sacred Timeline
+        // will be read without any way of knowing! (I realized this the hard way
+        // at the last minute)
+        if (partStatus !== 200) throw new Error(`Requesting timeline part ${binName} from ${url} returned status: ${partStatus}`);
         const partArrayBuffer = await partResponse.arrayBuffer();
         console.log(`Received timeline part ${binName} from ${url}`);
         return Buffer.from(partArrayBuffer);
