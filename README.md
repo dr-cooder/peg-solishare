@@ -28,5 +28,3 @@ In Peg SoliShare, players can play Peg Solitaire puzzles created by other player
 - Bootstrap documentation
 ### External Components
 - Bootstrap
-## To-Do
-- Online functionality (upload, browse, and play user-generated puzzles)
