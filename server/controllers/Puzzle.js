@@ -54,6 +54,7 @@ const upload = async (req, res, getTimelinePart) => {
   try {
     buf = await getTimelinePart(ballCount, codeSample);
   } catch (err) {
+    console.error(err);
     return res.status(500).json({ error: 'Unable to verify solvability!' });
   }
   let bitQueue = '';
@@ -204,6 +205,7 @@ const hint = async (req, res, getTimelinePart) => {
   try {
     cachePartBufs = await Promise.all(cachePartPromises);
   } catch (err) {
+    console.error(err);
     return res.status(500).json({ error: 'Unable to find hints!' });
   }
 

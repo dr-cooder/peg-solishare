@@ -112,14 +112,14 @@ if (timelineDirectory && timelineUrlPattern) {
       start(async (count, sample) => {
         const binName = `${count}-${sample}.bin`;
         const binId = json[binName];
-        if (!binId) throw new Error('External Sacred Timeline directory is incomplete!');
+        // Assume that empty files are not in directory (presumably not uploaded either)
+        if (!binId) return Buffer.alloc(0);
         const url = `${urlLeft}${binId}${urlRight}`;
         const partResponse = await fetch(url);
         const partStatus = partResponse.status;
         // If anything but the expected file is returned (i.e. a 429 HTML page)
-        // it will still be read as raw binary, and as such an incorrect Sacred Timeline
-        // will be read without any way of knowing! (I realized this the hard way
-        // at the last minute)
+        // it will still be read as raw binary, and as such a false-positive, incorrect
+        // Sacred Timeline will be read without any way of knowing!
         if (partStatus !== 200) throw new Error(`Requesting timeline part ${binName} from ${url} returned status: ${partStatus}`);
         const partArrayBuffer = await partResponse.arrayBuffer();
         console.log(`Received timeline part ${binName} from ${url}`);
