@@ -138,8 +138,8 @@ if (timelineDirectory && timelineUrlPattern) {
     try {
       return fs.readFileSync(`${__dirname}/../sacredTimeline/count-sample/${count}-${sample}.bin`);
     } catch (err) {
-      console.error('Local Sacred Timeline is incomplete!');
-      throw err;
+      // Assume local Sacred Timeline is complete
+      return Buffer.alloc(0);
     }
   });
 }
