@@ -82,7 +82,7 @@ const generateCountFile = (ballCount) => {
         if (puzzlesDone >= puzzleCountThousandth) {
           puzzlesDone -= puzzleCountThousandth;
           progressThousandth++;
-          progressPercent(progressThousandth, progressMessageLen);
+          progressPercent(progressThousandth, progressMessageLen, startTime);
         }
       }
     }
@@ -138,7 +138,7 @@ const splitCountFile = (ballCount) => {
     while (bytesDone > bufSizeThousandth) {
       bytesDone -= bufSizeThousandth;
       progressThousandth++;
-      progressPercent(progressThousandth, progressMessageLen);
+      progressPercent(progressThousandth, progressMessageLen, startTime);
     }
   }
   progressPercent(1000, progressMessageLen);
@@ -188,7 +188,7 @@ const splitCountFile = (ballCount) => {
       while (puzzlesDone > puzzleCountAllThousandth) {
         puzzlesDone -= puzzleCountAllThousandth;
         progressThousandth++;
-        progressPercent(progressThousandth, progressMessageLen);
+        progressPercent(progressThousandth, progressMessageLen, startTime);
       }
     }
   }
