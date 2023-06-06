@@ -77,7 +77,7 @@ class PuzzleSet {
       if (bytesDone >= contentsSizeThousandth) {
         bytesDone -= contentsSizeThousandth;
         progressThousandth++;
-        progressPercent(progressThousandth, progressMessageLen);
+        progressPercent(progressThousandth, progressMessageLen, startTime);
       }
     }
     // Handle remainder

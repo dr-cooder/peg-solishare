@@ -24,7 +24,11 @@ const formatTime = (milisTotal) => {
 const progressPercent = (progressOutOfThousand, offset, startTime) => {
   let etaText = '';
   if (startTime && progressOutOfThousand > 0) {
-    etaText = ` ETA \x1b[93m${formatTime((Date.now() - startTime) / progressOutOfThousand * (1000 - progressOutOfThousand))}\x1b[39m`;
+    etaText = ` ETA \x1b[93m${formatTime(((Date.now() - startTime) / progressOutOfThousand) * (1000 - progressOutOfThousand))}\x1b[39m`;
+  }
+  if (progressOutOfThousand === 1000) {
+    // https://stackoverflow.com/questions/32938213/is-there-a-way-to-erase-the-last-line-of-output
+    etaText = '\x1b[K';
   }
   const beforeDecimal = progressOutOfThousand.toString().padStart(2, '0').padStart(4, ' ');
   // https://blog.bitsrc.io/coloring-your-terminal-using-nodejs-eb647d4af2a2

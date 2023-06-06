@@ -281,11 +281,20 @@ const codeSampleIndexes = [
   // 4,
   // 14, 16, 18,
   // 28,
+  // 8-point diamond configuration (still not quite enough)
+  // 4,
+  // 8, 10,
+  // 14, 18,
+  // 22, 24,
+  // 28,
+  // Centered, board-spanning plus configuration (good AFAIK)
+  1,
   4,
-  8, 10,
-  14, 18,
-  22, 24,
+  9,
+  13, 14, 15, 16, 17, 18, 19,
+  23,
   28,
+  31,
 ];
 const codeSampleIndexCount = codeSampleIndexes.length;
 const codeSampleRange = 2 ** codeSampleIndexCount;
@@ -296,6 +305,10 @@ const sampleCode = (binCode) => {
   }
   return parseInt(sampleBin, 2);
 };
+
+const countBinName = (count) => `${count}.bin`;
+const countSampleBinNameNoExt = (count, sample) => `${count}-${sample}`;
+const countSampleBinName = (count, sample) => `${countSampleBinNameNoExt(count, sample)}.bin`;
 
 // Ensure an object is in the { from: {x, y}, to: {x, y} } format
 const validateMoveStruct = (move) => move && move.from && typeof move.from.x === 'number' && typeof move.from.y === 'number'
@@ -324,4 +337,7 @@ module.exports = {
   codeSampleRange,
   sampleCode,
   validateMoveStruct,
+  countBinName,
+  countSampleBinNameNoExt,
+  countSampleBinName,
 };

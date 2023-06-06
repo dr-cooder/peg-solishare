@@ -16,6 +16,7 @@ const csrf = require('csurf');
 const config = require('./config.js');
 
 const router = require('./router.js');
+const { countSampleBinName, countSampleBinNameNoExt } = require('../common/puzzle.js');
 
 mongoose.connect(config.connections.mongo, (err) => {
   if (err) {
@@ -110,7 +111,7 @@ if (timelineDirectory && timelineUrlPattern) {
   fetch(timelineDirectory).then((response) => {
     response.json().then((json) => {
       start(async (count, sample) => {
-        const binName = `${count}-${sample}.bin`;
+        const binName = countSampleBinNameNoExt(count, sample);
         const binId = json[binName];
         // Assume that empty files are not in directory (presumably not uploaded either)
         if (!binId) return Buffer.alloc(0);
@@ -136,7 +137,7 @@ if (timelineDirectory && timelineUrlPattern) {
 } else {
   start(async (count, sample) => {
     try {
-      return fs.readFileSync(`${__dirname}/../sacredTimeline/count-sample/${count}-${sample}.bin`);
+      return fs.readFileSync(`${__dirname}/../sacredTimeline/count-sample/${countSampleBinName(count, sample)}`);
     } catch (err) {
       // Assume local Sacred Timeline is complete
       return Buffer.alloc(0);

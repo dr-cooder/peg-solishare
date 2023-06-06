@@ -8,6 +8,8 @@ const {
   slotCount,
   codeSampleRange,
   sampleCode,
+  countBinName,
+  countSampleBinName,
 } = require('../common/puzzle.js');
 const {
   byteToBits,
@@ -30,16 +32,17 @@ if (Number.isNaN(ballCountIn)
 // (unless the count is 1, entailing the already-known solved states)
 const generateCountFile = (ballCount) => {
   if (ballCount === 1) {
-    // Make what the list of all one-ball win states would be under the "no symmetries" rule
+    // Make the list of all one-ball win states.
+    // This is unique and extremely fast, so don't bother with ETA or "done having started at"
     process.stdout.write('Initializing win states (wherein 1 ball is left)...');
     const winStates = new PuzzleSet();
     for (let i = 0; i < slotCount; i++) winStates.add(`${'0'.repeat(i)}1${'0'.repeat(slotCount - 1 - i)}`);
     process.stdout.write('\nDone\n');
-    fs.writeFileSync('count/1.bin', winStates.toBuffer());
+    fs.writeFileSync(`count/${countBinName(1)}`, winStates.toBuffer());
   } else {
     // Read from the previous file instead of keeping the whole of the past cache in working memory
     // (not viable considering its size)
-    const buf = fs.readFileSync(`count/${ballCount - 1}.bin`);
+    const buf = fs.readFileSync(`count/${countBinName(ballCount - 1)}`);
     const bufSize = buf.byteLength;
     // How many puzzles fit into (bytes * 8) bits?
     const puzzleCount = Math.floor((bufSize * 8) / slotCount);
@@ -89,7 +92,7 @@ const generateCountFile = (ballCount) => {
     progressPercent(1000, progressMessageLen);
     doneHavingStartedAt(startTime);
 
-    fs.writeFileSync(`count/${ballCount}.bin`, solvables.toBuffer());
+    fs.writeFileSync(`count/${countBinName(ballCount)}`, solvables.toBuffer(startTime));
   }
 };
 
@@ -101,7 +104,7 @@ const splitCountFile = (ballCount) => {
   // are what caused the memory overflows in early iterations; remmeber that we are
   // working with a huge amount of data and need to be efficient about it
 
-  const buf = fs.readFileSync(`count/${ballCount}.bin`);
+  const buf = fs.readFileSync(`count/${countBinName(ballCount)}`);
   const bufSize = buf.byteLength;
   // Our progress here will be measured in how much of the full, pre-split file we have read
   const bufSizeThousandth = bufSize / 1000;
@@ -195,12 +198,16 @@ const splitCountFile = (ballCount) => {
   progressPercent(1000, progressMessageLen);
 
   for (let s = 0; s < codeSampleRange; s++) {
+    const thisBitQueue = bitQueues[s];
+    const thisByteList = byteLists[s];
     // Deal with remainders
-    if (bitQueues[s].length > 0) {
-      byteLists[s][byteListIndexes[s]] = byteFromBitRemainder(bitQueues[s]);
+    if (thisBitQueue.length > 0) {
+      thisByteList[byteListIndexes[s]] = byteFromBitRemainder(thisBitQueue);
     }
-    // Write the file
-    fs.writeFileSync(`count-sample/${ballCount}-${s}.bin`, Buffer.from(byteLists[s]));
+    // Write the file (DON'T DO IF EMPTY)
+    if (thisByteList.byteLength > 0) {
+      fs.writeFileSync(`count-sample/${countSampleBinName(ballCount, s)}`, Buffer.from(thisByteList));
+    }
   }
 
   doneHavingStartedAt(startTime);
