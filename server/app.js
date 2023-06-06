@@ -118,10 +118,12 @@ if (timelineDirectory && timelineUrlPattern) {
         const url = `${urlLeft}${binId}${urlRight}`;
         const partResponse = await fetch(url);
         const partStatus = partResponse.status;
-        // If anything but the expected file is returned (i.e. a 429 HTML page)
+        const partType = partResponse.headers.get('content-type');
+        // If anything but the expected file is returned
+        // (i.e. a 429 HTML page or a file that isn't an "octet-stream")
         // it will still be read as raw binary, and as such a false-positive, incorrect
         // Sacred Timeline will be read without any way of knowing!
-        if (partStatus !== 200) throw new Error(`Requesting timeline part ${binName} from ${url} returned status: ${partStatus}`);
+        if (partStatus !== 200 || partType !== 'application/octet-stream') throw new Error(`Requesting timeline part ${binName} from ${url} returned status ${partStatus} and type ${partType} - Please ensure that your host of choice permits automated requests!`);
         const partArrayBuffer = await partResponse.arrayBuffer();
         console.log(`Received timeline part ${binName} from ${url}`);
         return Buffer.from(partArrayBuffer);
@@ -131,7 +133,7 @@ if (timelineDirectory && timelineUrlPattern) {
       throw err;
     });
   }).catch((err) => {
-    console.error('Unable to fetch external timeline directory! Please ensure the environment variable is a working link!');
+    console.error('Unable to fetch external timeline directory! Please ensure the environment variable is a working link, and that your host of choice permits automated requests!');
     throw err;
   });
 } else {
