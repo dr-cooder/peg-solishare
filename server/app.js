@@ -12,11 +12,12 @@ const session = require('express-session');
 const RedisStore = require('connect-redis')(session);
 const redis = require('redis');
 const csrf = require('csurf');
+const { Storage } = require('@google-cloud/storage');
 
 const config = require('./config.js');
 
 const router = require('./router.js');
-const { countSampleBinName, countSampleBinNameNoExt } = require('../common/puzzle.js');
+const { countSampleBinName } = require('../common/puzzle.js');
 
 mongoose.connect(config.connections.mongo, (err) => {
   if (err) {
@@ -102,39 +103,21 @@ const start = (getTimelinePart) => {
   });
 };
 
-const timelineDirectory = process.env.TIMELINE_DIRECTORY;
-const timelineUrlPattern = process.env.TIMELINE_URL_PATTERN;
-if (timelineDirectory && timelineUrlPattern) {
-  const urlPatternSplit = timelineUrlPattern.split('|');
-  const urlLeft = urlPatternSplit[0];
-  const urlRight = urlPatternSplit[1] || '';
-  fetch(timelineDirectory).then((response) => {
-    response.json().then((json) => {
-      start(async (count, sample) => {
-        const binName = countSampleBinNameNoExt(count, sample);
-        const binId = json[binName];
-        // Assume that empty files are not in directory (presumably not uploaded either)
-        if (!binId) return Buffer.alloc(0);
-        const url = `${urlLeft}${binId}${urlRight}`;
-        const partResponse = await fetch(url);
-        const partStatus = partResponse.status;
-        const partType = partResponse.headers.get('content-type');
-        // If anything but the expected file is returned
-        // (i.e. a 429 HTML page or a file that isn't an "octet-stream")
-        // it will still be read as raw binary, and as such a false-positive, incorrect
-        // Sacred Timeline will be read without any way of knowing!
-        if (partStatus !== 200 || partType !== 'application/octet-stream') throw new Error(`Requesting timeline part ${binName} from ${url} returned status ${partStatus} and type ${partType} - Please ensure that your host of choice permits automated requests!`);
-        const partArrayBuffer = await partResponse.arrayBuffer();
-        console.log(`Received timeline part ${binName} from ${url}`);
-        return Buffer.from(partArrayBuffer);
-      });
-    }).catch((err) => {
-      console.error('Unable to parse timeline directory JSON!');
-      throw err;
-    });
-  }).catch((err) => {
-    console.error('Unable to fetch external timeline directory! Please ensure the environment variable is a working link, and that your host of choice permits automated requests!');
-    throw err;
+const googleConnection = config.connections.google;
+if (googleConnection) {
+  // https://www.youtube.com/watch?v=pGSzMfKBV9Q
+  const gc = new Storage(googleConnection.options);
+  const bucketName = googleConnection.bucket;
+  start(async (count, sample) => {
+    const binName = countSampleBinName(count, sample);
+    try {
+      const download = await gc.bucket(bucketName).file(binName).download();
+      // https://github.com/googleapis/nodejs-storage/issues/676
+      return Buffer.from(download[0]);
+    } catch (err) {
+      // Assume cloud Sacred Timeline is complete
+      return Buffer.alloc(0);
+    }
   });
 } else {
   start(async (count, sample) => {

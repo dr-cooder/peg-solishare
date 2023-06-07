@@ -9,6 +9,10 @@ const staticAssets = {
   },
 };
 
+const googleAvailable = !!(process.env.GOOGLE_CLOUD_PROJECT_ID
+  && process.env.GOOGLE_CLOUD_KEY
+  && process.env.GOOGLE_CLOUD_BUCKET);
+
 const connections = {
   development: {
     http: {
@@ -16,6 +20,13 @@ const connections = {
     },
     mongo: process.env.MONGODB_URI || 'mongodb://127.0.0.1/PegSoliShare',
     redis: process.env.REDISCLOUD_URL,
+    google: googleAvailable && {
+      options: {
+        projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
+        credentials: JSON.parse(process.env.GOOGLE_CLOUD_KEY),
+      },
+      bucket: process.env.GOOGLE_CLOUD_BUCKET,
+    },
   },
 
   production: {
@@ -24,6 +35,13 @@ const connections = {
     },
     mongo: process.env.MONGODB_URI,
     redis: process.env.REDISCLOUD_URL,
+    google: googleAvailable && {
+      options: {
+        projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
+        credentials: JSON.parse(process.env.GOOGLE_CLOUD_KEY),
+      },
+      bucket: process.env.GOOGLE_CLOUD_BUCKET,
+    },
   },
 };
 

@@ -25,6 +25,8 @@ In Peg SoliShare, players can play Peg Solitaire puzzles created by other player
 - https://stackoverflow.com/questions/6528876/how-to-redirect-404-errors-to-a-page-in-expressjs
 - https://stackoverflow.com/questions/36212722/how-to-prevent-pull-down-to-refresh-of-mobile-chrome
 - https://stackoverflow.com/questions/115983/how-do-i-add-an-empty-directory-to-a-git-repository
+- https://www.youtube.com/watch?v=pGSzMfKBV9Q
+- https://github.com/googleapis/nodejs-storage/issues/676
 - Bootstrap documentation
 ### External Components
 - Bootstrap

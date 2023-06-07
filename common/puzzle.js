@@ -307,8 +307,7 @@ const sampleCode = (binCode) => {
 };
 
 const countBinName = (count) => `${count}.bin`;
-const countSampleBinNameNoExt = (count, sample) => `${count}-${sample}`;
-const countSampleBinName = (count, sample) => `${countSampleBinNameNoExt(count, sample)}.bin`;
+const countSampleBinName = (count, sample) => `${count}-${sample}.bin`;
 
 // Ensure an object is in the { from: {x, y}, to: {x, y} } format
 const validateMoveStruct = (move) => move && move.from && typeof move.from.x === 'number' && typeof move.from.y === 'number'
@@ -338,6 +337,5 @@ module.exports = {
   sampleCode,
   validateMoveStruct,
   countBinName,
-  countSampleBinNameNoExt,
   countSampleBinName,
 };
